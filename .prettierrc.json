@@ -1,0 +1,11 @@
+{
+  "singleQuote": true,
+  "trailingComma": "none",
+  "endOfLine": "lf",
+  "bracketSpacing": true,
+  "arrowParens": "avoid",
+  "embeddedLanguageFormatting": "off",
+  "tabWidth": 2,
+  "useTabs": false,
+  "xmlWhitespaceSensitivity": "ignore"
+}
