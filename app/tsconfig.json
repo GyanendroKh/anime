@@ -11,6 +11,13 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
-    "paths": {}
+    "paths": {
+      "@anime/env": [
+        "libs/env/src"
+      ],
+      "@anime/env/*": [
+        "libs/env/src/*"
+      ]
+    }
   }
 }

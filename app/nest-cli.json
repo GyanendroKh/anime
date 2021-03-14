@@ -25,6 +25,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/spider/tsconfig.app.json"
       }
+    },
+    "env": {
+      "type": "library",
+      "root": "libs/env",
+      "entryFile": "index",
+      "sourceRoot": "libs/env/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/env/tsconfig.lib.json"
+      }
     }
   }
 }
