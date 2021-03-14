@@ -12,12 +12,8 @@
     "baseUrl": "./",
     "incremental": true,
     "paths": {
-      "@anime/env": [
-        "libs/env/src"
-      ],
-      "@anime/env/*": [
-        "libs/env/src/*"
-      ]
+      "@anime/env": ["libs/env/src"],
+      "@anime/env/*": ["libs/env/src/*"]
     }
   }
 }
