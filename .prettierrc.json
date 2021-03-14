@@ -6,6 +6,5 @@
   "arrowParens": "avoid",
   "embeddedLanguageFormatting": "off",
   "tabWidth": 2,
-  "useTabs": false,
-  "xmlWhitespaceSensitivity": "ignore"
+  "useTabs": false
 }
