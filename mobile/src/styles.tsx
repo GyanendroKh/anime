@@ -4,6 +4,9 @@ const styles = StyleSheet.create({
   flex1: {
     flex: 1
   },
+  flexGrow1: {
+    flexGrow: 1
+  },
   center: {
     alignItems: 'center',
     justifyContent: 'center'
