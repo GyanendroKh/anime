@@ -3,7 +3,6 @@ import React, { FC } from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
   Provider as PaperProvider,
-  Title,
   DarkTheme as PaperDarkTheme
 } from 'react-native-paper';
 import {
@@ -11,6 +10,7 @@ import {
   DarkTheme as NavigationDarkTheme
 } from '@react-navigation/native';
 import merge from 'deepmerge';
+import { RootNavigator } from './navigators';
 
 const theme = merge(NavigationDarkTheme, PaperDarkTheme);
 
@@ -19,7 +19,7 @@ export const App: FC = () => {
     <PaperProvider theme={theme}>
       <NavigationContainer theme={theme}>
         <View style={styles.container}>
-          <Title>Arch Anime</Title>
+          <RootNavigator />
         </View>
       </NavigationContainer>
     </PaperProvider>
