@@ -10,6 +10,12 @@ const styles = StyleSheet.create({
   center: {
     alignItems: 'center',
     justifyContent: 'center'
+  },
+  height10: {
+    height: 10
+  },
+  width10: {
+    width: 10
   }
 });
 
