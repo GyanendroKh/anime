@@ -1,61 +1,15 @@
 import React, { FC } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Appbar, Button, Title } from 'react-native-paper';
-import Animated, {
-  Extrapolate,
-  interpolate,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useSharedValue
-} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
+import { useCollapsibleAppbar } from '../hooks';
 import styles from '../styles';
 import { HomeNavProps } from '../navigators';
-
-type DiffClampCtx = {
-  value: number;
-  prevValue: number;
-};
-
-const APPBAR_HEIGHT = 50 + 8;
-const minScroll = 100;
+import { APPBAR_HEIGHT } from '../constants';
 
 export const Dashboard: FC<HomeNavProps<'Dashboard'>> = ({ navigation }) => {
-  const translateY = useSharedValue(0);
-
-  const scrollHandler = useAnimatedScrollHandler({
-    onBeginDrag: (_, ctx: DiffClampCtx) => {
-      ctx.value = ctx.prevValue = 0;
-    },
-    onScroll: ({ contentOffset: { y } }, ctx: DiffClampCtx) => {
-      const clampedScrollY = interpolate(
-        y,
-        [minScroll, minScroll + 1],
-        [0, 1],
-        { extrapolateLeft: Extrapolate.CLAMP }
-      );
-
-      const minusScrollY = clampedScrollY * -1;
-
-      // Custom diffClamp Implementation.
-      const value = minusScrollY;
-      const diff = value - ctx.prevValue;
-      ctx.prevValue = value;
-      ctx.value = Math.min(Math.max(ctx.value + diff, -APPBAR_HEIGHT), 0);
-
-      translateY.value = ctx.value;
-    }
-  });
-
-  const appBarStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateY: translateY.value }]
-    };
-  });
-
-  const contentStyle = useAnimatedStyle(() => {
-    return {
-      marginTop: translateY.value
-    };
+  const { scrollHandler, appBarStyle, contentStyle } = useCollapsibleAppbar({
+    appBarHeight: APPBAR_HEIGHT
   });
 
   return (
@@ -87,9 +41,6 @@ const styles2 = StyleSheet.create({
     height: APPBAR_HEIGHT
   },
   content: {
-    height: 1000,
-    backgroundColor: 'green',
-    borderColor: 'blue',
-    borderWidth: 5
+    height: 1000
   }
 });
