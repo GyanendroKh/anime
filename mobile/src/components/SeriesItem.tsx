@@ -2,11 +2,10 @@ import React, { FC, memo } from 'react';
 import { Image, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Subheading, Surface } from 'react-native-paper';
+import { ISeriesBasic } from '../types';
 
 export type SeriesItemProps = {
-  series: {
-    title: string;
-  };
+  series: ISeriesBasic;
   style?: StyleProp<ViewStyle>;
   onPress?: () => void;
   image?: {
@@ -20,15 +19,27 @@ const defaultImageSize = {
   width: 150
 };
 
-const SeriesItemBase: FC<SeriesItemProps> = ({ style, image, onPress }) => {
+const SeriesItemBase: FC<SeriesItemProps> = ({
+  series,
+  style,
+  image,
+  onPress
+}) => {
   const imageWidth = image?.width || defaultImageSize.width;
   const imageHeight = image?.height || defaultImageSize.height;
 
   return (
     <TouchableOpacity style={style} activeOpacity={0.7} onPress={onPress}>
-      <Surface style={styles.content}>
+      <Surface
+        style={[
+          styles.content,
+          {
+            width: imageWidth
+          }
+        ]}
+      >
         <Image
-          source={{ uri: 'https://gogocdn.net/cover/chou-kuse-ni-narisou.png' }}
+          source={{ uri: series.thumbnail }}
           style={[
             styles.image,
             {
@@ -38,9 +49,10 @@ const SeriesItemBase: FC<SeriesItemProps> = ({ style, image, onPress }) => {
           ]}
           width={imageWidth}
           height={imageHeight}
+          resizeMode="cover"
         />
         <View style={styles.details}>
-          <Subheading numberOfLines={1}>Title</Subheading>
+          <Subheading numberOfLines={1}>{series.name}</Subheading>
         </View>
       </Surface>
     </TouchableOpacity>
