@@ -79,24 +79,27 @@ export const Dashboard: FC<HomeNavProps<'Dashboard'>> = ({ navigation }) => {
           title="Top Animes"
           {...topAnime}
           onPress={anime => {
-            console.log(anime);
-            navigation.navigate('Series');
+            navigation.navigate('Series', {
+              series: anime
+            });
           }}
         />
         <AnimeSection
           title="Trending Animes"
           {...trendingAnime}
           onPress={anime => {
-            console.log(anime);
-            navigation.navigate('Series');
+            navigation.navigate('Series', {
+              series: anime
+            });
           }}
         />
         <AnimeSection
           title="My Collections"
           {...myAnimeCollection}
           onPress={anime => {
-            console.log(anime);
-            navigation.navigate('Series');
+            navigation.navigate('Series', {
+              series: anime
+            });
           }}
         />
       </Animated.ScrollView>

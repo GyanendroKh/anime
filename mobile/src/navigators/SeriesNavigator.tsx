@@ -1,3 +1,7 @@
+import { ISeriesBasic } from '../types';
+
 export type SeriesParamList = {
-  Series: undefined;
+  Series: {
+    series: ISeriesBasic;
+  };
 };

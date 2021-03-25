@@ -1,18 +1,10 @@
 import 'react-native-gesture-handler';
 import React, { FC } from 'react';
 import { StyleSheet, View } from 'react-native';
-import {
-  Provider as PaperProvider,
-  DarkTheme as PaperDarkTheme
-} from 'react-native-paper';
-import {
-  NavigationContainer,
-  DarkTheme as NavigationDarkTheme
-} from '@react-navigation/native';
-import merge from 'deepmerge';
+import { Provider as PaperProvider } from 'react-native-paper';
+import { NavigationContainer } from '@react-navigation/native';
 import { RootNavigator } from './navigators';
-
-const theme = merge(NavigationDarkTheme, PaperDarkTheme);
+import { theme } from './constants';
 
 export const App: FC = () => {
   return (

@@ -16,6 +16,12 @@ const styles = StyleSheet.create({
   },
   width10: {
     width: 10
+  },
+  displayFlex: {
+    display: 'flex'
+  },
+  displayNone: {
+    display: 'none'
   }
 });
 
