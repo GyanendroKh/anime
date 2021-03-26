@@ -1,4 +1,4 @@
-package com.mobile;
+package com.arch.anime;
 
 import com.facebook.react.ReactActivity;
 
