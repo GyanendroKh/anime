@@ -24,6 +24,7 @@
     "react-native-safe-area-context": "^3.2.0",
     "react-native-screens": "^2.18.1",
     "react-native-vector-icons": "^8.1.0",
+    "react-native-video": "^5.1.1",
     "zustand": "^3.3.3"
   },
   "devDependencies": {
@@ -33,6 +34,7 @@
     "@types/jest": "^26.0.20",
     "@types/react-native": "^0.64.0",
     "@types/react-native-vector-icons": "^6.4.6",
+    "@types/react-native-video": "^5.0.4",
     "@types/react-test-renderer": "^16.9.2",
     "babel-jest": "^26.6.3",
     "eslint": "^7.14.0",
