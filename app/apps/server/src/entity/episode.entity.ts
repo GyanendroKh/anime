@@ -23,17 +23,7 @@ export class Episode extends BaseEntity {
   number: number;
 
   @Column()
-  name: string;
-
-  @Column({
-    unique: true
-  })
-  link: string;
-
-  @Column({
-    unique: true
-  })
-  videoId: string;
+  title: string;
 
   @ManyToOne(() => Series, s => s.episodes)
   series: Series;

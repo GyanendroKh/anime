@@ -25,15 +25,8 @@ export class Series extends BaseEntity {
   @Column()
   title: string;
 
-  @Column({
-    unique: true
-  })
-  link: string;
-
-  @Column({
-    unique: true
-  })
-  movieId: string;
+  @Column()
+  type: string;
 
   @Column({
     nullable: true
