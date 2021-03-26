@@ -5,7 +5,7 @@ import {
 } from '@react-navigation/stack';
 import { NavProps } from '../types';
 import { MainNavProps } from './MainNavigator';
-import { Dashboard, HomeSeries } from '../pages';
+import { Dashboard, HomeSeries, HomSeriesPlay } from '../pages';
 import { SeriesParamList } from './SeriesNavigator';
 
 type HomeParamList = {
@@ -25,6 +25,7 @@ export const HomeNavigator: FC<MainNavProps<'Home'>> = () => {
     <Stack.Navigator initialRouteName="Dashboard" headerMode="none">
       <Stack.Screen name="Dashboard" component={Dashboard} />
       <Stack.Screen name="Series" component={HomeSeries} />
+      <Stack.Screen name="SeriesPlay" component={HomSeriesPlay} />
     </Stack.Navigator>
   );
 };

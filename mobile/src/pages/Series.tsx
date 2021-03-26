@@ -153,6 +153,9 @@ export const HomeSeries: FC<HomeNavProps<'Series'>> = ({
   return (
     <Series
       series={series}
+      onEpisodePress={({ anime, episodeIndex }) => {
+        navigation.navigate('SeriesPlay', { anime, episodeIndex });
+      }}
       onBackBtnPress={() => {
         if (navigation.canGoBack()) {
           navigation.goBack();
