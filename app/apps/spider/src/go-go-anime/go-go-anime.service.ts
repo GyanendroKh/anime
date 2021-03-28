@@ -167,4 +167,44 @@ export class GoGoAnimeService {
 
     return episodes;
   }
+
+  async getAnimeEpisodeId(link: string): Promise<string> {
+    const res = await this.httpService.get(link).toPromise();
+    const html = res.data;
+
+    const $ = cheerioLoad(html);
+
+    const src = $('.play-video iframe').attr('src');
+
+    const matches = src.match(/id=(?<id>\w+)/);
+
+    if (!matches) {
+      return null;
+    }
+
+    return matches.groups['id'];
+  }
+
+  async getAnimeVideoLinks(videoId: string): Promise<any> {
+    const url = new URL('https://gogo-play.net/download');
+    url.searchParams.set('id', videoId);
+
+    const res = await this.httpService.get(url.toString()).toPromise();
+    const html = res.data;
+
+    const $ = cheerioLoad(html);
+
+    const links = [];
+
+    $('.mirror_link .dowload a[download]').each((_, ele) => {
+      const a = $(ele);
+
+      const text = a.text().replace('Download', '').trim();
+      const href = a.attr('href');
+
+      links.push({ text, href });
+    });
+
+    return links;
+  }
 }
