@@ -79,7 +79,9 @@
     ],
     "moduleNameMapper": {
       "@anime/env/(.*)": "<rootDir>/libs/env/src/$1",
-      "@anime/env": "<rootDir>/libs/env/src"
+      "@anime/env": "<rootDir>/libs/env/src",
+      "@anime/data/(.*)": "<rootDir>/libs/data/src/$1",
+      "@anime/data": "<rootDir>/libs/data/src"
     }
   },
   "lint-staged": {
