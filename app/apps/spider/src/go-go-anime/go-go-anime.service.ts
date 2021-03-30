@@ -1,5 +1,11 @@
 import { HttpService, Injectable } from '@nestjs/common';
 import { load as cheerioLoad } from 'cheerio';
+import {
+  IAnimeEpisodeRet,
+  IAnimeInfoRet,
+  IAnimeListRet,
+  IAnimeVideLink
+} from './go-go-anime.interface';
 
 @Injectable()
 export class GoGoAnimeService {
@@ -9,7 +15,7 @@ export class GoGoAnimeService {
     this.baseUrl = 'https://gogoanime.ai';
   }
 
-  async getAnimeList(pageNo: number) {
+  async getAnimeList(pageNo: number): Promise<IAnimeListRet> {
     const url = new URL('/anime-list.html', this.baseUrl);
     url.searchParams.set('page', String(pageNo));
 
@@ -18,7 +24,7 @@ export class GoGoAnimeService {
 
     const $ = cheerioLoad(html);
 
-    const list: { title: string; url: string }[] = [];
+    const list: IAnimeListRet['list'] = [];
 
     $('.anime_list_body ul li').each((_, ele) => {
       const e = $(ele).children('a');
@@ -26,7 +32,7 @@ export class GoGoAnimeService {
       const title = e.text().trim();
       const href = e.attr('href');
 
-      list.push({ title, url: href });
+      list.push({ name: title, link: href });
     });
 
     const paginations: number[] = [];
@@ -45,7 +51,7 @@ export class GoGoAnimeService {
     };
   }
 
-  async getAnimeInfo(link: string): Promise<unknown> {
+  async getAnimeInfo(link: string): Promise<IAnimeInfoRet> {
     const url = new URL(link, this.baseUrl);
 
     const res = await this.httpService.get(url.toString()).toPromise();
@@ -60,7 +66,7 @@ export class GoGoAnimeService {
     const image = animeInfoBodyBg.children('img').attr('src');
     const title = animeInfoBodyBg.children('h1').text().trim();
 
-    const data = {
+    const data: IAnimeInfoRet = {
       link,
       movieId,
       image,
@@ -122,14 +128,14 @@ export class GoGoAnimeService {
     $('.anime_video_body ul#episode_page li').each((_, ele) => {
       const a = $(ele).children('a');
 
-      const start = a.attr('ep_start');
-      const end = a.attr('ep_end');
+      const start = Number(a.attr('ep_start'));
+      const end = Number(a.attr('ep_end'));
 
       data.episodePages.push({ start, end });
     });
 
     data.episodePages.forEach(d => {
-      if (Number(d.end) > Number(data.episodeCount)) {
+      if (d.end > data.episodeCount) {
         data.episodeCount = d.end;
       }
     });
@@ -141,7 +147,7 @@ export class GoGoAnimeService {
     movideId: string,
     start: string,
     end: string
-  ): Promise<unknown> {
+  ): Promise<IAnimeEpisodeRet[]> {
     const url = new URL('https://ajax.gogo-load.com/ajax/load-list-episode');
 
     url.searchParams.set('id', movideId);
@@ -154,7 +160,7 @@ export class GoGoAnimeService {
 
     const $ = cheerioLoad(html);
 
-    const episodes = [];
+    const episodes: IAnimeEpisodeRet[] = [];
 
     $('ul#episode_related li').each((_, ele) => {
       const a = $(ele).children('a');
@@ -162,7 +168,7 @@ export class GoGoAnimeService {
       const name = a.children('.name').text().trim();
       const href = a.attr('href').trim();
 
-      episodes.push({ name, href });
+      episodes.push({ name, link: href });
     });
 
     return episodes;
@@ -185,7 +191,7 @@ export class GoGoAnimeService {
     return matches.groups['id'];
   }
 
-  async getAnimeVideoLinks(videoId: string): Promise<any> {
+  async getAnimeVideoLinks(videoId: string): Promise<IAnimeVideLink[]> {
     const url = new URL('https://gogo-play.net/download');
     url.searchParams.set('id', videoId);
 
@@ -194,7 +200,7 @@ export class GoGoAnimeService {
 
     const $ = cheerioLoad(html);
 
-    const links = [];
+    const links: IAnimeVideLink[] = [];
 
     $('.mirror_link .dowload a[download]').each((_, ele) => {
       const a = $(ele);
@@ -202,7 +208,7 @@ export class GoGoAnimeService {
       const text = a.text().replace('Download', '').trim();
       const href = a.attr('href');
 
-      links.push({ text, href });
+      links.push({ name: text, link: href });
     });
 
     return links;
