@@ -3,10 +3,12 @@ import { SpiderController } from './spider.controller';
 import { SpiderService } from './spider.service';
 import { GoGoAnimeService } from './go-go-anime/go-go-anime.service';
 import { GoGoAnimeController } from './go-go-anime/go-go-anime.controller';
+import { GoGoAnimeRunner } from './go-go-anime/go-go-anime.runner';
+import { GoGoAnimeState } from './go-go-anime/go-go-anime.state';
 
 @Module({
   imports: [HttpModule],
   controllers: [SpiderController, GoGoAnimeController],
-  providers: [SpiderService, GoGoAnimeService]
+  providers: [SpiderService, GoGoAnimeService, GoGoAnimeRunner, GoGoAnimeState]
 })
 export class SpiderModule {}
