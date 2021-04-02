@@ -10,6 +10,11 @@ export class Queue<T> {
     return this;
   }
 
+  addMultiple(data: T[]): this {
+    this.data.push(...data);
+    return this;
+  }
+
   get(): T {
     if (this.size() === 0) {
       return null;
