@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { BehaviorSubject, EMPTY, of, Subscription } from 'rxjs';
+import { BehaviorSubject, EMPTY, of } from 'rxjs';
 import { concatMap, tap } from 'rxjs/operators';
+import { Queue } from '../../../../libs/data/src';
 import { INameLinkRet } from './go-go-anime.interface';
 import { GoGoAnimeService } from './go-go-anime.service';
 import { GoGoAnimeState } from './go-go-anime.state';
@@ -15,9 +16,9 @@ export class GoGoAnimeRunner {
     end: string;
   }>;
 
-  private animeListSubscription$: Subscription;
-  private animeInfoSubscription$: Subscription;
-  private animeEpisodesSubscription$: Subscription;
+  private readonly animeList$isRunning: BehaviorSubject<boolean>;
+  private readonly animeInfo$isRunning: BehaviorSubject<boolean>;
+  private readonly animeEpisodes$isRunning: BehaviorSubject<boolean>;
 
   constructor(
     private readonly state: GoGoAnimeState,
@@ -26,27 +27,50 @@ export class GoGoAnimeRunner {
     this.animeList$ = new BehaviorSubject(0);
     this.animeInfo$ = new BehaviorSubject(null);
     this.animeEpisodes$ = new BehaviorSubject(null);
+
+    this.animeList$isRunning = new BehaviorSubject(false);
+    this.animeInfo$isRunning = new BehaviorSubject(false);
+    this.animeEpisodes$isRunning = new BehaviorSubject(false);
+
+    this.state.getAnimeList().onAdded(() => {
+      if (!this.animeList$isRunning.value) {
+        this.start('list');
+      }
+    });
+    this.state.getAnimeInfo().onAdded(() => {
+      if (!this.animeInfo$isRunning.value) {
+        this.start('info');
+      }
+    });
+    this.state.getAnimeEpisodes().onAdded(() => {
+      if (!this.animeEpisodes$isRunning.value) {
+        this.start('episodes');
+      }
+    });
   }
 
   subscribeAnimeList() {
     return this.animeList$
       .pipe(
         concatMap(d => (d === 0 ? EMPTY : of(d))),
-        tap(d => console.log('Start... Anime List:', d)),
-        concatMap(d => this.service.getAnimeList(d)),
-        tap(d => console.log('End  ... Anime List:', d.pageNo, '\n'))
+        tap(d => {
+          console.log('Anime List. Start:', d);
+        }),
+        concatMap(d => this.service.getAnimeList(d))
       )
       .subscribe(
         d => {
-          d.list.forEach(i => {
-            this.state.getAnimeInfo().add(i);
-          });
+          const current = this.state.getAnimeList().getData();
+          const newPages = d.paginations.filter(
+            i => i > d.pageNo && !current.includes(i)
+          );
 
-          if (d.paginations.includes(d.pageNo + 1)) {
-            this.animeList$.next(d.pageNo + 1);
-          } else {
-            console.log('Finish Anime List.');
-          }
+          this.state.getAnimeList().addMultiple(newPages);
+          this.state.getAnimeInfo().addMultiple(d.list);
+
+          console.log('Anime List. Finish:', d.pageNo, '\n');
+
+          this.start('list');
         },
         err => console.log(err)
       );
@@ -56,17 +80,19 @@ export class GoGoAnimeRunner {
     return this.animeInfo$
       .pipe(
         concatMap(d => (d === null ? EMPTY : of(d))),
-        tap(d => console.log('Start... Anime Info:', d.name)),
-        concatMap(d => this.service.getAnimeInfo(d.link)),
-        tap(d => console.log('End  ... Anime Info:', d.title, '\n'))
+        tap(d => {
+          console.log('Anime Info. Start:', d.name);
+        }),
+        concatMap(d => this.service.getAnimeInfo(d.link))
       )
       .subscribe(
         d => {
+          console.log('Anime Info. End:', d.title, '\n');
           this.state
             .getAnimeEpisodes()
             .add({ movieId: d.movieId, start: '0', end: d.episodeCount + '' });
 
-          this.startInfo();
+          this.start('info');
         },
         err => {
           console.log(err);
@@ -78,46 +104,70 @@ export class GoGoAnimeRunner {
     return this.animeEpisodes$
       .pipe(
         concatMap(d => (d === null ? EMPTY : of(d))),
-        tap(d => console.log('Start... Anime Episodes:', d.movieId)),
-        concatMap(d =>
-          this.service.loadAnimeEpidoes(d.movieId, d.start, d.end)
-        ),
-        tap(() => console.log('End... Anime Episodes.\n'))
+        tap(d => {
+          console.log('Anime Episodes. Start:', d.movieId);
+        }),
+        concatMap(d => this.service.loadAnimeEpidoes(d.movieId, d.start, d.end))
       )
       .subscribe(() => {
-        this.startEpisodes();
+        console.log('Anime Episodes. End.\n');
+
+        this.start('episodes');
       });
   }
 
   subscribe() {
-    this.animeListSubscription$ = this.subscribeAnimeList();
-    this.animeInfoSubscription$ = this.subscribeAnimeInfo();
-    this.animeEpisodesSubscription$ = this.subscribeAnimeEpisodes();
+    this.subscribeAnimeList();
+    this.subscribeAnimeInfo();
+    this.subscribeAnimeEpisodes();
+
+    this.animeList$isRunning.subscribe(d => {
+      console.log('Anime List. Running:', d);
+    });
+    this.animeInfo$isRunning.subscribe(d => {
+      console.log('Anime Info. Running:', d);
+    });
+    this.animeEpisodes$isRunning.subscribe(d => {
+      console.log('Anime Episodes. Running:', d);
+    });
   }
 
-  unsubscribe() {
-    this.animeListSubscription$.unsubscribe();
-    this.animeInfoSubscription$.unsubscribe();
-    this.animeEpisodesSubscription$.unsubscribe();
-  }
+  start(type: 'list' | 'info' | 'episodes'): boolean {
+    const objs: {
+      [K in typeof type]: [
+        Queue<any>,
+        BehaviorSubject<any>,
+        BehaviorSubject<boolean>
+      ];
+    } = {
+      list: [
+        this.state.getAnimeList(),
+        this.animeList$,
+        this.animeList$isRunning
+      ],
+      info: [
+        this.state.getAnimeInfo(),
+        this.animeInfo$,
+        this.animeInfo$isRunning
+      ],
+      episodes: [
+        this.state.getAnimeEpisodes(),
+        this.animeEpisodes$,
+        this.animeEpisodes$isRunning
+      ]
+    };
 
-  startFresh() {
-    this.animeList$.next(1);
-  }
-
-  startInfo() {
-    const next = this.state.getAnimeInfo().get();
+    const next = objs[type][0].get();
 
     if (next) {
-      this.animeInfo$.next(next);
+      if (!objs[type][2].value) {
+        objs[type][2].next(true);
+      }
+      objs[type][1].next(next);
+    } else {
+      objs[type][2].next(false);
     }
-  }
 
-  startEpisodes() {
-    const next = this.state.getAnimeEpisodes().get();
-
-    if (next) {
-      this.animeEpisodes$.next(next);
-    }
+    return !!next;
   }
 }

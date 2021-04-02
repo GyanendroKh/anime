@@ -13,21 +13,6 @@ export class GoGoAnimeController {
 
   @Get('/startFresh')
   startFresh() {
-    this.runner.startFresh();
-  }
-
-  @Get('/startInfo')
-  startInfo() {
-    this.runner.startInfo();
-  }
-
-  @Get('/startEpisodes')
-  startEpisodes() {
-    this.runner.startEpisodes();
-  }
-
-  @Get('/state/animeinfo')
-  stateAnimeInfo() {
-    return this.state.getAnimeInfo().getData();
+    this.state.getAnimeList().add(1);
   }
 }
