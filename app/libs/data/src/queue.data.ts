@@ -1,5 +1,6 @@
 export class Queue<T> {
   private data: T[];
+  private onDataAdded: () => void = undefined;
 
   constructor(data: T[] = []) {
     this.data = data;
@@ -7,12 +8,30 @@ export class Queue<T> {
 
   add(data: T): this {
     this.data.push(data);
+
+    this.callOnAdded();
+
     return this;
   }
 
   addMultiple(data: T[]): this {
     this.data.push(...data);
+
+    this.callOnAdded();
+
     return this;
+  }
+
+  onAdded(callback: () => void): this {
+    this.onDataAdded = callback;
+
+    return this;
+  }
+
+  private callOnAdded() {
+    if (this.onDataAdded) {
+      this.onDataAdded();
+    }
   }
 
   get(): T {
