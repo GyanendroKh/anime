@@ -101,7 +101,7 @@ export class GoGoAnimeRunner {
 
         this.events$.next({
           type: 'list',
-          action: 'start',
+          action: 'finish',
           data: d
         });
 
