@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BehaviorSubject, EMPTY, Observable, of } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, of, Subscription } from 'rxjs';
 import { concatMap, tap } from 'rxjs/operators';
 import { Queue } from '../../../../libs/data/src';
 import { IEvent, INameLinkRet } from './go-go-anime.interface';
@@ -8,6 +8,8 @@ import { GoGoAnimeState } from './go-go-anime.state';
 
 @Injectable()
 export class GoGoAnimeRunner {
+  private readonly isRunning$: BehaviorSubject<boolean>;
+
   private readonly events$: BehaviorSubject<IEvent<any>>;
 
   private readonly animeList$: BehaviorSubject<number>;
@@ -22,19 +24,25 @@ export class GoGoAnimeRunner {
   private readonly animeInfo$isRunning: BehaviorSubject<boolean>;
   private readonly animeEpisodes$isRunning: BehaviorSubject<boolean>;
 
+  private readonly subscriptions$: Subscription[];
+
   constructor(
     private readonly state: GoGoAnimeState,
     private readonly service: GoGoAnimeService
   ) {
+    this.isRunning$ = new BehaviorSubject(false);
+
     this.events$ = new BehaviorSubject(null);
 
-    this.animeList$ = new BehaviorSubject(0);
+    this.animeList$ = new BehaviorSubject(null);
     this.animeInfo$ = new BehaviorSubject(null);
     this.animeEpisodes$ = new BehaviorSubject(null);
 
     this.animeList$isRunning = new BehaviorSubject(false);
     this.animeInfo$isRunning = new BehaviorSubject(false);
     this.animeEpisodes$isRunning = new BehaviorSubject(false);
+
+    this.subscriptions$ = [];
 
     this.state.getAnimeList().onAdded((t, data) => {
       this.events$.next({
@@ -44,7 +52,7 @@ export class GoGoAnimeRunner {
       });
 
       if (!this.animeList$isRunning.value) {
-        this.start('list');
+        this.next('list');
       }
     });
 
@@ -56,7 +64,7 @@ export class GoGoAnimeRunner {
       });
 
       if (!this.animeInfo$isRunning.value) {
-        this.start('info');
+        this.next('info');
       }
     });
 
@@ -68,8 +76,46 @@ export class GoGoAnimeRunner {
       });
 
       if (!this.animeEpisodes$isRunning.value) {
-        this.start('episodes');
+        this.next('episodes');
       }
+    });
+
+    this.isRunning$.subscribe(d => {
+      if (d) {
+        Array.from(this.subscribe()).forEach(s => this.subscriptions$.push(s));
+      } else {
+        this.unsubscribe();
+
+        this.events$.next(null);
+
+        [this.animeList$, this.animeInfo$, this.animeEpisodes$].forEach(s => {
+          s.next(null);
+        });
+
+        [
+          this.animeList$isRunning,
+          this.animeInfo$isRunning,
+          this.animeEpisodes$isRunning
+        ].forEach(s => {
+          s.next(false);
+        });
+
+        [
+          this.state.getAnimeList(),
+          this.state.getAnimeInfo(),
+          this.state.getAnimeEpisodes()
+        ].forEach(s => {
+          s.clear();
+        });
+
+        this.unsubscribe();
+      }
+
+      this.events$.next({
+        type: 'runner',
+        action: 'running',
+        data: d
+      });
     });
   }
 
@@ -77,10 +123,10 @@ export class GoGoAnimeRunner {
     return this.events$.pipe(concatMap(d => (d === null ? EMPTY : of(d))));
   }
 
-  subscribeAnimeList() {
+  private subscribeAnimeList() {
     return this.animeList$
       .pipe(
-        concatMap(d => (d === 0 ? EMPTY : of(d))),
+        concatMap(d => (d === null ? EMPTY : of(d))),
         tap(d => {
           this.events$.next({
             type: 'list',
@@ -105,11 +151,11 @@ export class GoGoAnimeRunner {
           data: d
         });
 
-        this.start('list');
+        this.next('list');
       });
   }
 
-  subscribeAnimeInfo() {
+  private subscribeAnimeInfo() {
     return this.animeInfo$
       .pipe(
         concatMap(d => (d === null ? EMPTY : of(d))),
@@ -133,11 +179,11 @@ export class GoGoAnimeRunner {
           data: d
         });
 
-        this.start('info');
+        this.next('info');
       });
   }
 
-  subscribeAnimeEpisodes() {
+  private subscribeAnimeEpisodes() {
     return this.animeEpisodes$
       .pipe(
         concatMap(d => (d === null ? EMPTY : of(d))),
@@ -157,30 +203,31 @@ export class GoGoAnimeRunner {
           data: d
         });
 
-        this.start('episodes');
+        this.next('episodes');
       });
   }
 
-  subscribe() {
-    this.subscribeAnimeList();
-    this.subscribeAnimeInfo();
-    this.subscribeAnimeEpisodes();
+  private *subscribe() {
+    yield this.subscribeAnimeEpisodes();
+    yield this.subscribeAnimeList();
+    yield this.subscribeAnimeInfo();
+    yield this.subscribeAnimeEpisodes();
 
-    this.animeList$isRunning.subscribe(d => {
+    yield this.animeList$isRunning.subscribe(d => {
       this.events$.next({
         type: 'list',
         action: 'running',
         data: d
       });
     });
-    this.animeInfo$isRunning.subscribe(d => {
+    yield this.animeInfo$isRunning.subscribe(d => {
       this.events$.next({
         type: 'info',
         action: 'running',
         data: d
       });
     });
-    this.animeEpisodes$isRunning.subscribe(d => {
+    yield this.animeEpisodes$isRunning.subscribe(d => {
       this.events$.next({
         type: 'episodes',
         action: 'running',
@@ -189,7 +236,13 @@ export class GoGoAnimeRunner {
     });
   }
 
-  start(type: 'list' | 'info' | 'episodes'): boolean {
+  private unsubscribe() {
+    this.subscriptions$.forEach(s => {
+      s.unsubscribe();
+    });
+  }
+
+  private next(type: 'list' | 'info' | 'episodes'): boolean {
     const objs: {
       [K in typeof type]: [
         Queue<any>,
@@ -226,5 +279,22 @@ export class GoGoAnimeRunner {
     }
 
     return !!next;
+  }
+
+  start() {
+    if (!this.isRunning$.value) {
+      this.isRunning$.next(true);
+      this.state.getAnimeList().add(1);
+    }
+  }
+
+  stop() {
+    if (this.isRunning$.value) {
+      this.isRunning$.next(false);
+    }
+  }
+
+  isRunning() {
+    return this.isRunning$.value;
   }
 }

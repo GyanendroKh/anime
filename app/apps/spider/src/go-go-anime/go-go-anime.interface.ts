@@ -33,7 +33,7 @@ export interface IAnimeEpisodeRet extends INameLinkRet {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IAnimeVideLink extends INameLinkRet {}
 
-export type IEventTypes = 'list' | 'info' | 'episodes';
+export type IEventTypes = 'runner' | 'list' | 'info' | 'episodes';
 
 export type IEventActions =
   | 'add'
