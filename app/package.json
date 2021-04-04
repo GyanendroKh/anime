@@ -29,6 +29,7 @@
     "@nestjs/typeorm": "^7.1.5",
     "@nestjs/websockets": "^7.6.15",
     "cheerio": "^1.0.0-rc.5",
+    "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "mysql2": "^2.2.5",
     "reflect-metadata": "^0.1.13",
