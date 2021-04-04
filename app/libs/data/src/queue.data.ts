@@ -66,4 +66,8 @@ export class Queue<T> {
   remove(idx: number) {
     this.data = this.data.filter((_, id) => id !== idx);
   }
+
+  clear() {
+    this.data = [];
+  }
 }
