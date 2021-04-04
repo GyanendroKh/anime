@@ -4,7 +4,8 @@ import {
   IAnimeEpisodeRet,
   IAnimeInfoRet,
   IAnimeListRet,
-  IAnimeVideLink
+  IAnimeVideLink,
+  INameLinkRet
 } from './go-go-anime.interface';
 
 @Injectable()
@@ -144,13 +145,13 @@ export class GoGoAnimeService {
   }
 
   async loadAnimeEpidoes(
-    movideId: string,
+    movieId: string,
     start: string,
     end: string
-  ): Promise<IAnimeEpisodeRet[]> {
+  ): Promise<IAnimeEpisodeRet> {
     const url = new URL('https://ajax.gogo-load.com/ajax/load-list-episode');
 
-    url.searchParams.set('id', movideId);
+    url.searchParams.set('id', movieId);
     url.searchParams.set('default_ep', '0');
     url.searchParams.set('ep_start', start);
     url.searchParams.set('ep_end', end);
@@ -160,7 +161,7 @@ export class GoGoAnimeService {
 
     const $ = cheerioLoad(html);
 
-    const episodes: IAnimeEpisodeRet[] = [];
+    const episodes: INameLinkRet[] = [];
 
     $('ul#episode_related li').each((_, ele) => {
       const a = $(ele).children('a');
@@ -171,7 +172,10 @@ export class GoGoAnimeService {
       episodes.push({ name, link: href });
     });
 
-    return episodes;
+    return {
+      movieId,
+      episodes
+    };
   }
 
   async getAnimeEpisodeId(link: string): Promise<string> {

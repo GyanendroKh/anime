@@ -148,7 +148,7 @@ export class GoGoAnimeRunner {
         this.events$.next({
           type: 'list',
           action: 'finish',
-          data: d
+          data: d.pageNo
         });
 
         this.next('list');
@@ -163,7 +163,7 @@ export class GoGoAnimeRunner {
           this.events$.next({
             type: 'info',
             action: 'start',
-            data: d
+            data: d.name
           });
         }),
         concatMap(d => this.service.getAnimeInfo(d.link))
@@ -176,7 +176,7 @@ export class GoGoAnimeRunner {
         this.events$.next({
           type: 'info',
           action: 'finish',
-          data: d
+          data: d.title
         });
 
         this.next('info');
@@ -191,7 +191,7 @@ export class GoGoAnimeRunner {
           this.events$.next({
             type: 'episodes',
             action: 'start',
-            data: d
+            data: d.movieId
           });
         }),
         concatMap(d => this.service.loadAnimeEpidoes(d.movieId, d.start, d.end))
@@ -200,7 +200,7 @@ export class GoGoAnimeRunner {
         this.events$.next({
           type: 'episodes',
           action: 'finish',
-          data: d
+          data: d.movieId
         });
 
         this.next('episodes');

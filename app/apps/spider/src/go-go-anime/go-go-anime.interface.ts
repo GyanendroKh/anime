@@ -28,7 +28,10 @@ export interface IAnimeInfoRet {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IAnimeEpisodeRet extends INameLinkRet {}
+export interface IAnimeEpisodeRet {
+  movieId: string;
+  episodes: INameLinkRet[];
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IAnimeVideLink extends INameLinkRet {}
