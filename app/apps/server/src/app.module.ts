@@ -1,18 +1,10 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TYPEORM_MODULE } from '@app/database';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      url: process.env.DATABASE_URL,
-      synchronize: false,
-      logging: true,
-      entities: []
-    })
-  ],
+  imports: [TYPEORM_MODULE],
   controllers: [AppController],
   providers: [AppService]
 })
