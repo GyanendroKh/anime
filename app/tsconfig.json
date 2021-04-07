@@ -15,7 +15,9 @@
       "@anime/env": ["libs/env/src"],
       "@anime/env/*": ["libs/env/src/*"],
       "@anime/data": ["libs/data/src"],
-      "@anime/data/*": ["libs/data/src/*"]
+      "@anime/data/*": ["libs/data/src/*"],
+      "@app/database": ["libs/database/src"],
+      "@app/database/*": ["libs/database/src/*"]
     }
   }
 }

@@ -85,7 +85,9 @@
       "@anime/env/(.*)": "<rootDir>/libs/env/src/$1",
       "@anime/env": "<rootDir>/libs/env/src",
       "@anime/data/(.*)": "<rootDir>/libs/data/src/$1",
-      "@anime/data": "<rootDir>/libs/data/src"
+      "@anime/data": "<rootDir>/libs/data/src",
+      "@app/database/(.*)": "<rootDir>/libs/database/src/$1",
+      "@app/database": "<rootDir>/libs/database/src"
     }
   },
   "lint-staged": {
