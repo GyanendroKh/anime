@@ -1,3 +1,4 @@
+import '@anime/env';
 import { NestFactory } from '@nestjs/core';
 import { SpiderModule } from './spider.module';
 
