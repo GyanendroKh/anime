@@ -6,17 +6,17 @@ import {
   OneToOne,
   PrimaryGeneratedColumn
 } from 'typeorm';
-import { Episode } from './episode.entity';
+import { Episode } from '../episode.entity';
 
 @Entity()
 export class GoGoAnimeEpisode extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   link: string;
 
-  @Column()
+  @Column({ unique: true })
   videoId: string;
 
   @OneToOne(() => Episode)

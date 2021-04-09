@@ -25,7 +25,9 @@ export class Series extends BaseEntity {
   @Column()
   title: string;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   type: string;
 
   @Column({
