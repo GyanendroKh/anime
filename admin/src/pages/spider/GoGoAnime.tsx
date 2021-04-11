@@ -62,6 +62,10 @@ export const GoGoAnime: FC = () => {
   const [list, setList] = useState<number[]>([]);
   const [info, setInfo] = useState<string[]>([]);
   const [episodes, setEpisodes] = useState<string[]>([]);
+  const [infoRunning, setInfoRunning] = useState(false);
+  const [episodesRunning, setEpisodesRunning] = useState(false);
+  const [infoRemaining, setInfoRemaining] = useState(0);
+  const [episodesRemaining, setEpisodesRemaining] = useState(0);
 
   useEffect(() => {
     axios.get('http://127.0.0.1:3000/gogoanime/state/isRunning').then(d => {
@@ -69,42 +73,56 @@ export const GoGoAnime: FC = () => {
     });
 
     const socket = io('http://127.0.0.1:3000');
-    socket.on('events', ({ action, data, type }: IEvent<any>) => {
+    socket.on('events', ({ action, data, extra, type }: IEvent<any>) => {
       if (type === 'list') {
-        if (action === 'add') {
+        if (action === 'start') {
+          console.log(data);
           setList(l => [...l, data]);
-        } else if (action === 'add-multiple') {
-          setList(l => [...l, ...data]);
+          return;
         }
+
         if (action === 'finish') {
           setList(l => l.filter(i => i !== data));
+          return;
         }
-        return;
       }
 
       if (type === 'info') {
-        if (action === 'add') {
-          setInfo(l => [...l, data.name]);
-        } else if (action === 'add-multiple') {
-          setInfo(l => [...l, ...data.map(d => d.name)]);
+        if (action === 'start') {
+          setInfo(l => [...l, data]);
+          setInfoRemaining(extra);
+          return;
         }
+
         if (action === 'finish') {
           setInfo(l => l.filter(i => i !== data));
+          setInfoRemaining(extra);
+          return;
         }
-        return;
+
+        if (action === 'running') {
+          setInfoRunning(data);
+          return;
+        }
       }
 
       if (type === 'episodes') {
-        if (action === 'add') {
-          console.log('Single:', data);
-          setEpisodes(l => [...l, data.movieId]);
-        } else if (action === 'add-multiple') {
-          setEpisodes(l => [...l, ...data.map(d => d.movieId)]);
+        if (action === 'start') {
+          setEpisodes(l => [...l, data]);
+          setEpisodesRemaining(extra);
+          return;
         }
+
         if (action === 'finish') {
           setEpisodes(l => l.filter(i => i !== data));
+          setEpisodesRemaining(extra);
+          return;
         }
-        return;
+
+        if (action === 'running') {
+          setEpisodesRunning(data);
+          return;
+        }
       }
 
       if (type === 'runner') {
@@ -156,7 +174,6 @@ export const GoGoAnime: FC = () => {
         <div className={classes.section}>
           <Box textAlign="center" padding={1} borderBottom="1px solid black">
             <Typography variant="h6">List</Typography>
-            <Typography variant="caption">Size: {list.length}</Typography>
           </Box>
           <List>
             {list.map(d => {
@@ -170,11 +187,13 @@ export const GoGoAnime: FC = () => {
         </div>
         <div className={classes.section}>
           <Box textAlign="center" padding={1} borderBottom="1px solid black">
-            <Typography variant="h6">Info</Typography>
-            <Typography variant="caption">Size: {info.length}</Typography>
+            <Typography variant="h6">Info {infoRunning && '*'}</Typography>
+            <Typography variant="caption">
+              Remaining: {infoRemaining}
+            </Typography>
           </Box>
           <List>
-            {info.slice(0, 50).map(d => {
+            {info.map(d => {
               return (
                 <ListItem key={d} button>
                   <ListItemText
@@ -194,11 +213,15 @@ export const GoGoAnime: FC = () => {
         </div>
         <div className={classes.section}>
           <Box textAlign="center" padding={1} borderBottom="1px solid black">
-            <Typography variant="h6">Episodes</Typography>
-            <Typography variant="caption">Size: {episodes.length}</Typography>
+            <Typography variant="h6">
+              Episodes {episodesRunning && '*'}
+            </Typography>
+            <Typography variant="caption">
+              Remaining: {episodesRemaining}
+            </Typography>
           </Box>
           <List>
-            {episodes.slice(0, 50).map(d => {
+            {episodes.map(d => {
               return (
                 <ListItem key={d} button>
                   <ListItemText

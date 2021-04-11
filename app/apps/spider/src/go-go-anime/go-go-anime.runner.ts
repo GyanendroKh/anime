@@ -1,300 +1,233 @@
 import { Injectable } from '@nestjs/common';
-import { BehaviorSubject, EMPTY, Observable, of, Subscription } from 'rxjs';
-import { concatMap, tap } from 'rxjs/operators';
-import { Queue } from '../../../../libs/data/src';
-import { IEvent, INameLinkRet } from './go-go-anime.interface';
+import { BehaviorSubject, EMPTY, of, Subscription } from 'rxjs';
+import { concatMap, filter, mergeMap, tap } from 'rxjs/operators';
+import { Runner } from '../runner';
+import {
+  IEpisodeRunner,
+  IEvent,
+  IEventActions,
+  IEventTypes,
+  INameLinkRet
+} from './go-go-anime.interface';
 import { GoGoAnimeService } from './go-go-anime.service';
-import { GoGoAnimeState } from './go-go-anime.state';
 
 @Injectable()
 export class GoGoAnimeRunner {
-  private readonly isRunning$: BehaviorSubject<boolean>;
+  private readonly running$: BehaviorSubject<boolean>;
 
   private readonly events$: BehaviorSubject<IEvent<any>>;
 
-  private readonly animeList$: BehaviorSubject<number>;
-  private readonly animeInfo$: BehaviorSubject<INameLinkRet>;
-  private readonly animeEpisodes$: BehaviorSubject<{
-    movieId: string;
-    start: string;
-    end: string;
-  }>;
+  private readonly listRunner: Runner<number>;
+  private readonly infoRunner: Runner<INameLinkRet>;
+  private readonly episodeRunner: Runner<IEpisodeRunner>;
 
-  private readonly animeList$isRunning: BehaviorSubject<boolean>;
-  private readonly animeInfo$isRunning: BehaviorSubject<boolean>;
-  private readonly animeEpisodes$isRunning: BehaviorSubject<boolean>;
+  private subscriptions$: Subscription[];
 
-  private readonly subscriptions$: Subscription[];
+  private readonly workerCount = {
+    info: 10,
+    episode: 10
+  };
 
-  constructor(
-    private readonly state: GoGoAnimeState,
-    private readonly service: GoGoAnimeService
-  ) {
-    this.isRunning$ = new BehaviorSubject(false);
+  private readonly remaning = {
+    info: 0,
+    episode: 0
+  };
+
+  constructor(private readonly service: GoGoAnimeService) {
+    this.running$ = new BehaviorSubject(null);
 
     this.events$ = new BehaviorSubject(null);
 
-    this.animeList$ = new BehaviorSubject(null);
-    this.animeInfo$ = new BehaviorSubject(null);
-    this.animeEpisodes$ = new BehaviorSubject(null);
-
-    this.animeList$isRunning = new BehaviorSubject(false);
-    this.animeInfo$isRunning = new BehaviorSubject(false);
-    this.animeEpisodes$isRunning = new BehaviorSubject(false);
+    this.listRunner = new Runner();
+    this.infoRunner = new Runner();
+    this.episodeRunner = new Runner();
 
     this.subscriptions$ = [];
 
-    this.state.getAnimeList().onAdded((t, data) => {
-      this.events$.next({
-        type: 'list',
-        action: t === 'multiple' ? 'add-multiple' : 'add',
-        data
-      });
+    this.listRunner.onRunning(this.nextEvent('list', 'running'));
+    this.infoRunner.onRunning(this.nextEvent('info', 'running'));
+    this.episodeRunner.onRunning(this.nextEvent('episodes', 'running'));
 
-      if (!this.animeList$isRunning.value) {
-        this.next('list');
+    this.listRunner.state.onAdded((t, data) => {
+      this.nextEvent('list', t === 'multiple' ? 'add-multiple' : 'add')(data);
+
+      if (!this.listRunner.isRunning()) {
+        this.listRunner.next();
       }
     });
 
-    this.state.getAnimeInfo().onAdded((t, data) => {
-      this.events$.next({
-        type: 'info',
-        action: t === 'multiple' ? 'add-multiple' : 'add',
-        data
-      });
+    this.infoRunner.state.onAdded((t, data) => {
+      this.nextEvent('info', t === 'multiple' ? 'add-multiple' : 'add')(data);
 
-      if (!this.animeInfo$isRunning.value) {
-        this.next('info');
+      if (t === 'single') {
+        this.infoRunner.next();
+        this.remaning.info++;
+      } else {
+        (data as INameLinkRet[]).forEach(() => {
+          this.infoRunner.next();
+          this.remaning.info++;
+        });
       }
     });
 
-    this.state.getAnimeEpisodes().onAdded((t, data) => {
-      this.events$.next({
-        type: 'episodes',
-        action: t === 'multiple' ? 'add-multiple' : 'add',
-        data
-      });
+    this.episodeRunner.state.onAdded((t, data) => {
+      this.nextEvent(
+        'episodes',
+        t === 'multiple' ? 'add-multiple' : 'add'
+      )(data);
 
-      if (!this.animeEpisodes$isRunning.value) {
-        this.next('episodes');
+      if (t === 'single') {
+        this.episodeRunner.next();
+        this.remaning.episode++;
+      } else {
+        (data as IEpisodeRunner[]).forEach(() => {
+          this.episodeRunner.next();
+          this.remaning.episode++;
+        });
       }
     });
 
-    this.isRunning$.subscribe(d => {
+    this.running$.subscribe(d => {
       if (d) {
-        Array.from(this.subscribe()).forEach(s => this.subscriptions$.push(s));
+        this.subscriptions$ = Array.from(this.subscribe());
       } else {
         this.unsubscribe();
 
         this.events$.next(null);
 
-        [this.animeList$, this.animeInfo$, this.animeEpisodes$].forEach(s => {
-          s.next(null);
+        [this.listRunner, this.infoRunner, this.episodeRunner].forEach(s => {
+          s.reset();
         });
-
-        [
-          this.animeList$isRunning,
-          this.animeInfo$isRunning,
-          this.animeEpisodes$isRunning
-        ].forEach(s => {
-          s.next(false);
-        });
-
-        [
-          this.state.getAnimeList(),
-          this.state.getAnimeInfo(),
-          this.state.getAnimeEpisodes()
-        ].forEach(s => {
-          s.clear();
-        });
-
-        this.unsubscribe();
       }
 
-      this.events$.next({
-        type: 'runner',
-        action: 'running',
-        data: d
-      });
+      this.nextEvent('runner', 'running')(d);
     });
   }
 
-  getEvent(): Observable<IEvent<any>> {
-    return this.events$.pipe(concatMap(d => (d === null ? EMPTY : of(d))));
+  getEvent() {
+    const allowedActions: IEventActions[] = ['start', 'finish', 'running'];
+
+    return this.events$.pipe(
+      concatMap(d => (d === null ? EMPTY : of(d))),
+      filter(d => allowedActions.includes(d.action))
+    );
   }
 
-  private subscribeAnimeList() {
-    return this.animeList$
-      .pipe(
-        concatMap(d => (d === null ? EMPTY : of(d))),
-        tap(d => {
-          this.events$.next({
-            type: 'list',
-            action: 'start',
-            data: d
-          });
-        }),
-        concatMap(d => this.service.getAnimeList(d))
-      )
-      .subscribe(d => {
-        const current = this.state.getAnimeList().getData();
-        const newPages = d.paginations.filter(
-          i => i > d.pageNo && !current.includes(i)
-        );
-
-        this.state.getAnimeList().addMultiple(newPages);
-        this.state.getAnimeInfo().addMultiple(d.list);
-
-        this.events$.next({
-          type: 'list',
-          action: 'finish',
-          data: d.pageNo
-        });
-
-        this.next('list');
-      });
-  }
-
-  private subscribeAnimeInfo() {
-    return this.animeInfo$
-      .pipe(
-        concatMap(d => (d === null ? EMPTY : of(d))),
-        tap(d => {
-          this.events$.next({
-            type: 'info',
-            action: 'start',
-            data: d.name
-          });
-        }),
-        concatMap(d => this.service.getAnimeInfo(d.link))
-      )
-      .subscribe(d => {
-        this.state
-          .getAnimeEpisodes()
-          .add({ movieId: d.movieId, start: '0', end: d.episodeCount + '' });
-
-        this.events$.next({
-          type: 'info',
-          action: 'finish',
-          data: d.title
-        });
-
-        this.next('info');
-      });
-  }
-
-  private subscribeAnimeEpisodes() {
-    return this.animeEpisodes$
-      .pipe(
-        concatMap(d => (d === null ? EMPTY : of(d))),
-        tap(d => {
-          this.events$.next({
-            type: 'episodes',
-            action: 'start',
-            data: d.movieId
-          });
-        }),
-        concatMap(d => this.service.loadAnimeEpidoes(d.movieId, d.start, d.end))
-      )
-      .subscribe(d => {
-        this.events$.next({
-          type: 'episodes',
-          action: 'finish',
-          data: d.movieId
-        });
-
-        this.next('episodes');
-      });
-  }
-
-  private *subscribe() {
-    yield this.subscribeAnimeEpisodes();
-    yield this.subscribeAnimeList();
-    yield this.subscribeAnimeInfo();
-    yield this.subscribeAnimeEpisodes();
-
-    yield this.animeList$isRunning.subscribe(d => {
-      this.events$.next({
-        type: 'list',
-        action: 'running',
-        data: d
-      });
-    });
-    yield this.animeInfo$isRunning.subscribe(d => {
-      this.events$.next({
-        type: 'info',
-        action: 'running',
-        data: d
-      });
-    });
-    yield this.animeEpisodes$isRunning.subscribe(d => {
-      this.events$.next({
-        type: 'episodes',
-        action: 'running',
-        data: d
-      });
-    });
-  }
-
-  private unsubscribe() {
-    this.subscriptions$.forEach(s => {
-      s.unsubscribe();
-    });
-  }
-
-  private next(type: 'list' | 'info' | 'episodes'): boolean {
-    const objs: {
-      [K in typeof type]: [
-        Queue<any>,
-        BehaviorSubject<any>,
-        BehaviorSubject<boolean>
-      ];
-    } = {
-      list: [
-        this.state.getAnimeList(),
-        this.animeList$,
-        this.animeList$isRunning
-      ],
-      info: [
-        this.state.getAnimeInfo(),
-        this.animeInfo$,
-        this.animeInfo$isRunning
-      ],
-      episodes: [
-        this.state.getAnimeEpisodes(),
-        this.animeEpisodes$,
-        this.animeEpisodes$isRunning
-      ]
-    };
-
-    const next = objs[type][0].get();
-
-    if (next) {
-      if (!objs[type][2].value) {
-        objs[type][2].next(true);
-      }
-      objs[type][1].next(next);
-    } else {
-      objs[type][2].next(false);
-    }
-
-    return !!next;
+  isRunning() {
+    return this.running$.value;
   }
 
   start() {
-    if (!this.isRunning$.value) {
-      this.isRunning$.next(true);
-      this.state.getAnimeList().add(1);
+    if (!this.running$.value) {
+      this.running$.next(true);
+      this.listRunner.state.add(1);
     }
   }
 
   stop() {
-    if (this.isRunning$.value) {
-      this.isRunning$.next(false);
+    if (this.running$.value) {
+      this.running$.next(false);
     }
   }
 
-  isRunning() {
-    return this.isRunning$.value;
+  private nextEvent(type: IEventTypes, action: IEventActions) {
+    return (data: any, extra: any = null) => {
+      this.events$.next({
+        type,
+        action,
+        data,
+        extra
+      });
+    };
+  }
+
+  private subscriberList() {
+    return this.listRunner
+      .get()
+      .pipe(
+        concatMap(async d => {
+          this.nextEvent('list', 'start')(d);
+
+          return {
+            pageNo: d,
+            data: await this.service.getAnimeList(d)
+          };
+        }),
+        tap(d => this.nextEvent('list', 'finish')(d.pageNo))
+      )
+      .subscribe(d => {
+        const current = this.listRunner.state.getData();
+        const newPages = d.data.paginations.filter(
+          i => i > d.data.pageNo && !current.includes(i)
+        );
+
+        this.listRunner.state.addMultiple(newPages);
+        this.infoRunner.state.addMultiple(d.data.list);
+
+        this.listRunner.next();
+      });
+  }
+
+  private subscribeInfo() {
+    return this.infoRunner
+      .get()
+      .pipe(
+        mergeMap(async d => {
+          this.nextEvent('info', 'start')(d.name, this.remaning.info);
+
+          return {
+            ...d,
+            data: await this.service.getAnimeInfo(d.link)
+          };
+        }, this.workerCount.info),
+        tap(d => {
+          this.remaning.info--;
+          this.nextEvent('info', 'finish')(d.name, this.remaning.info);
+        })
+      )
+      .subscribe(d => {
+        this.episodeRunner.state.add({
+          movieId: d.data.movieId,
+          start: 0,
+          end: d.data.episodeCount
+        });
+      });
+  }
+
+  private subscribeEpisode() {
+    return this.episodeRunner
+      .get()
+      .pipe(
+        mergeMap(async d => {
+          this.nextEvent('episodes', 'start')(d.movieId, this.remaning.episode);
+
+          return {
+            ...d,
+            data: await this.service.loadAnimeEpidoes(d.movieId, d.start, d.end)
+          };
+        }, this.workerCount.episode),
+        tap(d => {
+          this.remaning.episode--;
+          this.nextEvent('episodes', 'finish')(
+            d.movieId,
+            this.remaning.episode
+          );
+        })
+      )
+      .subscribe();
+  }
+
+  private *subscribe() {
+    yield this.subscriberList();
+    yield this.subscribeInfo();
+    yield this.subscribeEpisode();
+  }
+
+  private unsubscribe() {
+    this.subscriptions$.filter(s => {
+      s.unsubscribe();
+
+      return false;
+    });
   }
 }

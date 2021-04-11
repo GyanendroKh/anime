@@ -46,4 +46,5 @@ export interface IEvent<T> {
   type: IEventTypes;
   action: IEventActions;
   data: T;
+  extra: any;
 }

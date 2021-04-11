@@ -146,15 +146,15 @@ export class GoGoAnimeService {
 
   async loadAnimeEpidoes(
     movieId: string,
-    start: string,
-    end: string
+    start: number,
+    end: number
   ): Promise<IAnimeEpisodeRet> {
     const url = new URL('https://ajax.gogo-load.com/ajax/load-list-episode');
 
     url.searchParams.set('id', movieId);
     url.searchParams.set('default_ep', '0');
-    url.searchParams.set('ep_start', start);
-    url.searchParams.set('ep_end', end);
+    url.searchParams.set('ep_start', start + '');
+    url.searchParams.set('ep_end', end + '');
 
     const res = await this.httpService.get(url.toString()).toPromise();
     const html = res.data;

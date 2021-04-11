@@ -45,8 +45,15 @@ export type IEventActions =
   | 'finish'
   | 'running';
 
-export interface IEvent<T> {
+export interface IEvent<T = any, K = any> {
   type: IEventTypes;
   action: IEventActions;
   data: T;
+  extra: K;
+}
+
+export interface IEpisodeRunner {
+  movieId: string;
+  start: number;
+  end: number;
 }
