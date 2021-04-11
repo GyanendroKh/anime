@@ -203,7 +203,7 @@ export class GoGoAnimeRunner {
 
           return {
             ...d,
-            data: await this.service.loadAnimeEpidoes(d.movieId, d.start, d.end)
+            data: await this.service.getAnimeEpisodes(d.movieId, d.start, d.end)
           };
         }, this.workerCount.episode),
         tap(d => {

@@ -144,7 +144,7 @@ export class GoGoAnimeService {
     return data;
   }
 
-  async loadAnimeEpidoes(
+  async getAnimeEpisodes(
     movieId: string,
     start: number,
     end: number
