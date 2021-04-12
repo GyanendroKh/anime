@@ -1,21 +1,36 @@
 import { Injectable } from '@nestjs/common';
 import { BehaviorSubject, EMPTY, of, Subscription } from 'rxjs';
-import { concatMap, filter, mergeMap, tap } from 'rxjs/operators';
+import { concatMap, filter, map, mergeMap, tap } from 'rxjs/operators';
 import { Runner } from '../runner';
+import { GoGoAnimeDatabase } from './go-go-anime.database';
 import {
+  IAnimeEpisodeRet,
+  IAnimeInfoRet,
   IEpisodeRunner,
   IEvent,
   IEventActions,
   IEventTypes,
+  INameLinkIdRet,
   INameLinkRet
 } from './go-go-anime.interface';
 import { GoGoAnimeService } from './go-go-anime.service';
+
+type INextDatabase =
+  | {
+      type: 'info';
+      data: INameLinkRet & { data: IAnimeInfoRet };
+    }
+  | {
+      type: 'episodes';
+      data: IEpisodeRunner & IAnimeEpisodeRet<INameLinkIdRet>;
+    };
 
 @Injectable()
 export class GoGoAnimeRunner {
   private readonly running$: BehaviorSubject<boolean>;
 
   private readonly events$: BehaviorSubject<IEvent<any>>;
+  private readonly database$: BehaviorSubject<INextDatabase>;
 
   private readonly listRunner: Runner<number>;
   private readonly infoRunner: Runner<INameLinkRet>;
@@ -33,10 +48,14 @@ export class GoGoAnimeRunner {
     episode: 0
   };
 
-  constructor(private readonly service: GoGoAnimeService) {
+  constructor(
+    private readonly service: GoGoAnimeService,
+    private readonly database: GoGoAnimeDatabase
+  ) {
     this.running$ = new BehaviorSubject(null);
 
     this.events$ = new BehaviorSubject(null);
+    this.database$ = new BehaviorSubject(null);
 
     this.listRunner = new Runner();
     this.infoRunner = new Runner();
@@ -113,6 +132,27 @@ export class GoGoAnimeRunner {
     );
   }
 
+  private subscribeDatabase$() {
+    return this.database$
+      .pipe(
+        concatMap(d => (d === null ? EMPTY : of(d))),
+        concatMap(async d => {
+          if (d.type === 'info') {
+            const series = await this.database.getSeries({
+              link: d.data.link
+            });
+
+            if (!series) {
+              await this.database.addSeries(d.data.data);
+            }
+          } else if (d.type === 'episodes') {
+            await this.database.addEpisodes(d.data);
+          }
+        })
+      )
+      .subscribe();
+  }
+
   isRunning() {
     return this.running$.value;
   }
@@ -139,6 +179,10 @@ export class GoGoAnimeRunner {
         extra
       });
     };
+  }
+
+  private nextDatabase(data: INextDatabase) {
+    this.database$.next(data);
   }
 
   private subscriberList() {
@@ -183,6 +227,10 @@ export class GoGoAnimeRunner {
         tap(d => {
           this.remaning.info--;
           this.nextEvent('info', 'finish')(d.name, this.remaning.info);
+          this.nextDatabase({
+            type: 'info',
+            data: d
+          });
         })
       )
       .subscribe(d => {
@@ -205,13 +253,57 @@ export class GoGoAnimeRunner {
             ...d,
             data: await this.service.getAnimeEpisodes(d.movieId, d.start, d.end)
           };
+
+          // return of(d).pipe(
+          //   concatMap(e =>
+          //     this.service.getAnimeEpisodes(e.movieId, e.start, e.end)
+          //   ),
+          //   concatMap(e => of(...e.episodes)),
+          //   mergeMap(async e => {
+          //     const url = new URL(e.link, this.service.baseUrl);
+          //     const id = await this.service.getAnimeEpisodeId(url.toString());
+
+          //     return {
+          //       ...e,
+          //       id: id
+          //     };
+          //   }, 25),
+          //   reduce((acc, c) => {
+          //     acc.push(c);
+          //     return acc;
+          //   }, [] as INameLinkIdRet[]),
+          //   map<INameLinkIdRet[], IAnimeEpisodeRet<INameLinkIdRet>>(e => {
+          //     return {
+          //       episodes: e,
+          //       movieId: d.movieId
+          //     };
+          //   })
+          // );
         }, this.workerCount.episode),
+        map(d => {
+          return {
+            ...d,
+            data: d.data.episodes.map<INameLinkIdRet>(e => {
+              return {
+                ...e,
+                id: null
+              };
+            })
+          };
+        }),
         tap(d => {
           this.remaning.episode--;
           this.nextEvent('episodes', 'finish')(
             d.movieId,
             this.remaning.episode
           );
+          this.nextDatabase({
+            type: 'episodes',
+            data: {
+              ...d,
+              episodes: d.data
+            }
+          });
         })
       )
       .subscribe();
@@ -221,6 +313,7 @@ export class GoGoAnimeRunner {
     yield this.subscriberList();
     yield this.subscribeInfo();
     yield this.subscribeEpisode();
+    yield this.subscribeDatabase$();
   }
 
   private unsubscribe() {

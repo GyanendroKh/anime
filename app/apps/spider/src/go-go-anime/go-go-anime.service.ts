@@ -10,7 +10,7 @@ import {
 
 @Injectable()
 export class GoGoAnimeService {
-  private readonly baseUrl: string;
+  public readonly baseUrl: string;
 
   constructor(private readonly httpService: HttpService) {
     this.baseUrl = 'https://gogoanime.ai';

@@ -3,6 +3,8 @@ export interface INameLinkRet {
   link: string;
 }
 
+export type INameLinkIdRet = INameLinkRet & { id: string };
+
 export interface IAnimeListRet {
   pageNo: number;
   list: INameLinkRet[];
@@ -28,9 +30,9 @@ export interface IAnimeInfoRet {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IAnimeEpisodeRet {
+export interface IAnimeEpisodeRet<T = INameLinkRet> {
   movieId: string;
-  episodes: INameLinkRet[];
+  episodes: T[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
