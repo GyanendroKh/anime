@@ -19,7 +19,9 @@ export class GoGoAnimeSeries extends BaseEntity {
   @Column({ unique: true })
   movieId: string;
 
-  @OneToOne(() => Series)
+  @OneToOne(() => Series, {
+    cascade: true
+  })
   @JoinColumn()
   series: Series;
 }

@@ -51,10 +51,14 @@ export class Series extends BaseEntity {
   })
   status: string;
 
-  @OneToMany(() => Episode, e => e.series)
+  @OneToMany(() => Episode, e => e.series, {
+    cascade: true
+  })
   episodes: Episode[];
 
-  @ManyToMany(() => Genre)
+  @ManyToMany(() => Genre, {
+    cascade: true
+  })
   @JoinTable()
   genres: Genre[];
 }

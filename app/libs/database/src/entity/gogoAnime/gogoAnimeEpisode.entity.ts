@@ -16,10 +16,15 @@ export class GoGoAnimeEpisode extends BaseEntity {
   @Column({ unique: true })
   link: string;
 
-  @Column({ unique: true })
+  @Column({
+    unique: true,
+    nullable: true
+  })
   videoId: string;
 
-  @OneToOne(() => Episode)
+  @OneToOne(() => Episode, {
+    cascade: true
+  })
   @JoinColumn()
   episode: Episode;
 }
