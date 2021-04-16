@@ -10,3 +10,4 @@ export const TYPEORM_MODULE = TypeOrmModule.forRoot({
 });
 
 export * from './entity';
+export * from './repo';
