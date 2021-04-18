@@ -16,7 +16,7 @@ export class SeriesResolver {
     return res;
   }
 
-  @Query(() => Series)
+  @Query(() => Series, { nullable: true })
   async series(@Args('uuid') uuid: string): Promise<Series> {
     return this.service.repo.get(uuid);
   }
