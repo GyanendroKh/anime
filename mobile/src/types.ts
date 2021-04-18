@@ -32,7 +32,14 @@ export type ISeries = {
 };
 
 export type ISeriesBasic = {
-  id: string;
-  name: string;
+  uuid: string;
+  title: string;
   thumbnail: string;
 };
+
+export interface IPaginatedData<T extends any> {
+  start: number;
+  end: number;
+  count: number;
+  data: T[];
+}

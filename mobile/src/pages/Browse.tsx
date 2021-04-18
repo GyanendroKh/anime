@@ -24,7 +24,13 @@ export const Browse: FC<ExploreNavProps<'Browse'>> = ({ navigation }) => {
           <Button
             mode="contained"
             onPress={() => {
-              navigation.navigate('Series');
+              navigation.navigate('Series', {
+                series: {
+                  uuid: '',
+                  thumbnail: '',
+                  title: ''
+                }
+              });
             }}
           >
             Series

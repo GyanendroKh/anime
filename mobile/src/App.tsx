@@ -5,16 +5,24 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 import { RootNavigator } from './navigators';
 import { theme } from './constants';
+import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
+
+const apolloClient = new ApolloClient({
+  uri: 'http://192.168.29.106:3000/graphql',
+  cache: new InMemoryCache()
+});
 
 export const App: FC = () => {
   return (
-    <PaperProvider theme={theme}>
-      <NavigationContainer theme={theme}>
-        <View style={styles.container}>
-          <RootNavigator />
-        </View>
-      </NavigationContainer>
-    </PaperProvider>
+    <ApolloProvider client={apolloClient}>
+      <PaperProvider theme={theme}>
+        <NavigationContainer theme={theme}>
+          <View style={styles.container}>
+            <RootNavigator />
+          </View>
+        </NavigationContainer>
+      </PaperProvider>
+    </ApolloProvider>
   );
 };
 

@@ -52,7 +52,7 @@ const SeriesItemBase: FC<SeriesItemProps> = ({
           resizeMode="cover"
         />
         <View style={styles.details}>
-          <Subheading numberOfLines={1}>{series.name}</Subheading>
+          <Subheading numberOfLines={1}>{series.title}</Subheading>
         </View>
       </Surface>
     </TouchableOpacity>

@@ -1,3 +1,4 @@
+import { useQuery } from '@apollo/client';
 import React, { FC, useMemo, useState } from 'react';
 import { View, Image, Dimensions, StyleSheet } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
@@ -12,8 +13,8 @@ import {
 } from 'react-native-paper';
 import Animated from 'react-native-reanimated';
 import { theme } from '../constants';
+import { GetAnimeType, GET_ANIME } from '../graphql/series';
 import { ExploreNavProps, HomeNavProps } from '../navigators';
-import { getSeriesInfo } from '../states';
 import styles from '../styles';
 import { ISeriesBasic } from '../types';
 
@@ -38,10 +39,18 @@ export const Series: FC<SeriesProps> = ({
   const [selectedContentHeader, setSelectedContentHeader] = useState<
     'info' | 'episodes'
   >('info');
+  const { data } = useQuery<GetAnimeType>(GET_ANIME, {
+    variables: {
+      uuid: series.uuid
+    }
+  });
 
   const anime = useMemo(() => {
-    return getSeriesInfo(series.id);
-  }, [series.id]);
+    return {
+      ...series,
+      ...data?.series
+    };
+  }, [data, series]);
 
   return (
     <>
@@ -75,7 +84,7 @@ export const Series: FC<SeriesProps> = ({
             ]}
             style={styles2.contentHeader}
           >
-            <Title>{series.name}</Title>
+            <Title>{series.title}</Title>
             <Subheading>Released: {anime?.released}</Subheading>
           </LinearGradient>
           <Surface style={[styles2.contentDetails, styles.flexGrow1]}>
@@ -123,19 +132,21 @@ export const Series: FC<SeriesProps> = ({
                   : styles.displayNone
               }
             >
-              {[...(anime?.episodes ?? [])].reverse().map((episode, idx) => {
-                return (
-                  <List.Item
-                    key={episode.videoId}
-                    title={episode.name}
-                    onPress={() => {
-                      if (onEpisodePress) {
-                        onEpisodePress({ anime, episodeIndex: idx });
-                      }
-                    }}
-                  />
-                );
-              })}
+              {[...((anime as any).episodes ?? [])]
+                .reverse()
+                .map((episode, idx) => {
+                  return (
+                    <List.Item
+                      key={episode.videoId}
+                      title={episode.name}
+                      onPress={() => {
+                        if (onEpisodePress) {
+                          onEpisodePress({ anime, episodeIndex: idx });
+                        }
+                      }}
+                    />
+                  );
+                })}
             </View>
           </Surface>
         </View>
