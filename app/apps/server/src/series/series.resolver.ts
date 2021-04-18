@@ -1,16 +1,19 @@
 import { Resolver, Query, Args } from '@nestjs/graphql';
 import { Series } from '@app/database';
 import { SeriesService } from './series.service';
+import { PaginationQuery, SeriesPaginatedData } from '../dto';
 
 @Resolver(() => Series)
 export class SeriesResolver {
   constructor(private readonly service: SeriesService) {}
 
-  @Query(() => [Series])
-  async seriesList(): Promise<Series[]> {
-    const res = await this.service.list();
+  @Query(() => SeriesPaginatedData)
+  async seriesList(
+    @Args('query', { nullable: true }) query: PaginationQuery
+  ): Promise<SeriesPaginatedData> {
+    const res = await this.service.list(query);
 
-    return res.data;
+    return res;
   }
 
   @Query(() => Series)
