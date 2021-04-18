@@ -1,3 +1,4 @@
+import { Field, ObjectType } from '@nestjs/graphql';
 import {
   BaseEntity,
   Column,
@@ -9,22 +10,26 @@ import {
 import { Episode } from '../episode.entity';
 
 @Entity()
+@ObjectType()
 export class GoGoAnimeEpisode extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ unique: true })
+  @Field()
   link: string;
 
   @Column({
     unique: true,
     nullable: true
   })
-  videoId: string;
+  @Field({ nullable: true })
+  videoId?: string;
 
   @OneToOne(() => Episode, {
     cascade: true
   })
   @JoinColumn()
+  @Field(() => Episode)
   episode: Episode;
 }

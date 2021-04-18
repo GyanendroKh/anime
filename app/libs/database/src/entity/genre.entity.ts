@@ -1,3 +1,4 @@
+import { Field, ObjectType } from '@nestjs/graphql';
 import {
   BaseEntity,
   Column,
@@ -7,6 +8,7 @@ import {
 } from 'typeorm';
 
 @Entity()
+@ObjectType()
 export class Genre extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -15,10 +17,12 @@ export class Genre extends BaseEntity {
     unique: true
   })
   @Generated('uuid')
+  @Field()
   uuid: string;
 
   @Column({
     unique: true
   })
+  @Field()
   name: string;
 }

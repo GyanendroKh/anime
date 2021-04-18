@@ -19,4 +19,8 @@ export class SeriesRepo {
       take
     });
   }
+
+  async get(uuid: string): Promise<Series | undefined> {
+    return this.repo.findOne({ uuid });
+  }
 }
