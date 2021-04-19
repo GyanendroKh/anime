@@ -13,22 +13,26 @@ export type NavProps<
   route: RouteProp<L, T>;
 };
 
-export type ISeries = {
+export type IGenre = {
+  uuid: string;
   name: string;
-  link: string;
-  movieId: string;
+};
+
+export type IEpisode = {
+  uuid: string;
+  number: number;
   title: string;
+};
+
+export type ISeries = {
+  title: string;
+  type: string;
   thumbnail: string;
   summary: string;
-  genres: string[];
   released: string;
   status: string;
-  episodesCount: number;
-  episodes: {
-    name: string;
-    link: string;
-    videoId: string;
-  }[];
+  genres: IGenre[];
+  episodes: IEpisode[];
 };
 
 export type ISeriesBasic = {

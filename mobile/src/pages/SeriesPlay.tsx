@@ -1,9 +1,17 @@
-import React, { FC, useEffect, useRef, useState } from 'react';
+import { useQuery } from '@apollo/client';
+import React, { FC, useRef, useState } from 'react';
 import { View, Dimensions, Image, StyleSheet } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { List, Surface, Text, Title } from 'react-native-paper';
+import {
+  ActivityIndicator,
+  List,
+  Surface,
+  Text,
+  Title
+} from 'react-native-paper';
 import Video from 'react-native-video';
 import { theme } from '../constants';
+import { GetVideoType, GET_VIDEO } from '../graphql/series';
 import Icon from '../Icon';
 import { HomeNavProps } from '../navigators';
 import styles from '../styles';
@@ -23,9 +31,13 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({ anime, episodeIndex }) => {
   });
   const [selectEpisode, setSelectedEpisode] = useState(episodeIndex);
 
-  useEffect(() => {
-    return () => {};
-  }, []);
+  const { data, loading } = useQuery<GetVideoType>(GET_VIDEO, {
+    variables: {
+      uuid: anime.episodes[selectEpisode].uuid
+    }
+  });
+
+  const videoLink = data?.episodeVideo.links[0].link;
 
   return (
     <>
@@ -37,34 +49,33 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({ anime, episodeIndex }) => {
           }
         ]}
       >
-        <Video
-          ref={ref => (video.current = ref || undefined)}
-          style={styles.absolute0}
-          resizeMode="contain"
-          playInBackground={false}
-          playWhenInactive={false}
-          source={{
-            uri:
-              'https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8',
-            headers: {
-              referer: 'https://kwik.cx/'
-            }
-          }}
-          onLoadStart={() => {
-            console.log('Started Loading...');
-          }}
-          onLoad={data => {
-            const { width, height } = data.naturalSize;
-            const newHeight = (height / width) * baseWidth;
-            setVideoHeight(newHeight);
-          }}
-          onError={e => {
-            console.log(e.error.errorString);
-            console.log('Error:', e);
-          }}
-          onVideoError={console.log}
-          controls={true}
-        />
+        {loading && <ActivityIndicator size={25} />}
+        {!loading && (
+          <Video
+            ref={ref => (video.current = ref || undefined)}
+            style={styles.absolute0}
+            resizeMode="contain"
+            playInBackground={false}
+            playWhenInactive={false}
+            source={{
+              uri: videoLink
+            }}
+            onLoadStart={() => {
+              console.log('Started Loading...');
+            }}
+            onLoad={({ naturalSize }) => {
+              const { width, height } = naturalSize;
+              const newHeight = (height / width) * baseWidth;
+              setVideoHeight(newHeight);
+            }}
+            onError={e => {
+              console.log(e.error.errorString);
+              console.log('Error:', e);
+            }}
+            onVideoError={console.log}
+            controls={true}
+          />
+        )}
       </View>
       <Surface style={styles2.detail}>
         <View style={styles.flexRow}>
@@ -79,7 +90,7 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({ anime, episodeIndex }) => {
               <Text style={styles2.detailInfoTitle}>{anime.title} - </Text>
               <Text style={styles2.detailInfoTitle}>{selectEpisode + 1}</Text>
             </View>
-            <Text>{anime.episodesCount} Episodes</Text>
+            <Text>{anime.episodes.length} Episodes</Text>
             <Text>{anime.status}</Text>
           </View>
         </View>
@@ -101,8 +112,8 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({ anime, episodeIndex }) => {
 
               return (
                 <List.Item
-                  key={a.videoId}
-                  title={a.name}
+                  key={a.uuid}
+                  title={a.title}
                   style={[
                     styles2.episodes,
                     borderRadius,
@@ -111,6 +122,16 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({ anime, episodeIndex }) => {
                   right={() => {
                     if (selectEpisode !== idx) {
                       return null;
+                    }
+
+                    if (loading) {
+                      return (
+                        <ActivityIndicator
+                          size={25}
+                          color={theme.colors.onSurface}
+                          style={styles.alignSelfCenter}
+                        />
+                      );
                     }
 
                     return (

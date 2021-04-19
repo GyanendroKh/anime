@@ -1,5 +1,5 @@
 import { gql } from '@apollo/client';
-import { ISeriesBasic } from '../types';
+import { ISeries, ISeriesBasic } from '../types';
 
 export type DASHBOARD_ANIMES_TYPE = {
   topAnimes: {
@@ -51,6 +51,60 @@ export const GET_ANIME = gql`
     series(uuid: $uuid) {
       summary
       released
+    }
+  }
+`;
+
+export type GetSeriesInfoType = {
+  series: ISeries;
+};
+
+export const GET_SERIES_INFO = gql`
+  query AnimeInfo($uuid: String!) {
+    series(uuid: $uuid) {
+      title
+      type
+      thumbnail
+      summary
+      released
+      status
+      genres {
+        uuid
+        name
+      }
+      episodes {
+        uuid
+        number
+        title
+      }
+    }
+  }
+`;
+
+export type GetVideoType = {
+  episodeVideo: {
+    episode: {
+      link: string;
+      videoId: string;
+    };
+    links: {
+      name: string;
+      link: string;
+    }[];
+  };
+};
+
+export const GET_VIDEO = gql`
+  query GetEpisodeVideo($uuid: String!) {
+    episodeVideo(uuid: $uuid) {
+      episode {
+        link
+        videoId
+      }
+      links {
+        name
+        link
+      }
     }
   }
 `;

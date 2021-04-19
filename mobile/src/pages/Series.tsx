@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client';
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useState } from 'react';
 import { View, Image, Dimensions, StyleSheet } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {
@@ -13,7 +13,7 @@ import {
 } from 'react-native-paper';
 import Animated from 'react-native-reanimated';
 import { theme } from '../constants';
-import { GetAnimeType, GET_ANIME } from '../graphql/series';
+import { GetSeriesInfoType, GET_SERIES_INFO } from '../graphql/series';
 import { ExploreNavProps, HomeNavProps } from '../navigators';
 import styles from '../styles';
 import { ISeriesBasic } from '../types';
@@ -39,18 +39,11 @@ export const Series: FC<SeriesProps> = ({
   const [selectedContentHeader, setSelectedContentHeader] = useState<
     'info' | 'episodes'
   >('info');
-  const { data } = useQuery<GetAnimeType>(GET_ANIME, {
+  const { data } = useQuery<GetSeriesInfoType>(GET_SERIES_INFO, {
     variables: {
       uuid: series.uuid
     }
   });
-
-  const anime = useMemo(() => {
-    return {
-      ...series,
-      ...data?.series
-    };
-  }, [data, series]);
 
   return (
     <>
@@ -85,7 +78,7 @@ export const Series: FC<SeriesProps> = ({
             style={styles2.contentHeader}
           >
             <Title>{series.title}</Title>
-            <Subheading>Released: {anime?.released}</Subheading>
+            <Subheading>Released: {data?.series?.released}</Subheading>
           </LinearGradient>
           <Surface style={[styles2.contentDetails, styles.flexGrow1]}>
             <View style={styles2.contentDetailsHeader}>
@@ -123,7 +116,7 @@ export const Series: FC<SeriesProps> = ({
                   : styles.displayNone
               }
             >
-              <Paragraph>{anime?.summary}</Paragraph>
+              <Paragraph>{data?.series.summary}</Paragraph>
             </View>
             <View
               style={
@@ -132,16 +125,19 @@ export const Series: FC<SeriesProps> = ({
                   : styles.displayNone
               }
             >
-              {[...((anime as any).episodes ?? [])]
-                .reverse()
+              {[...(data?.series.episodes ?? [])]
+                .sort((a, b) => a.number - b.number)
                 .map((episode, idx) => {
                   return (
                     <List.Item
-                      key={episode.videoId}
-                      title={episode.name}
+                      key={episode.uuid}
+                      title={episode.title}
                       onPress={() => {
                         if (onEpisodePress) {
-                          onEpisodePress({ anime, episodeIndex: idx });
+                          onEpisodePress({
+                            anime: data?.series,
+                            episodeIndex: idx
+                          });
                         }
                       }}
                     />
