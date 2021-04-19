@@ -16,11 +16,19 @@ export class SeriesRepo {
 
     return await this.repo.findAndCount({
       skip,
-      take
+      take,
+      relations: ['genres', 'episodes']
     });
   }
 
   async get(uuid: string): Promise<Series | undefined> {
-    return this.repo.findOne({ uuid });
+    return this.repo.findOne(
+      {
+        uuid
+      },
+      {
+        relations: ['genres', 'episodes']
+      }
+    );
   }
 }

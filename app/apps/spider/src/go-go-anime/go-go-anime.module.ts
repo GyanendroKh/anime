@@ -20,6 +20,7 @@ import { GoGoAnimeState } from './go-go-anime.state';
     GoGoAnimeState,
     GoGoAnimeGateWay,
     GoGoAnimeDatabase
-  ]
+  ],
+  exports: [GoGoAnimeService]
 })
 export class GoGoAnimeModule {}
