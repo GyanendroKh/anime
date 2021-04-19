@@ -196,6 +196,18 @@ export class GoGoAnimeService {
   }
 
   async getAnimeVideoLinks(videoId: string): Promise<IAnimeVideLink[]> {
+    const url = new URL('https://gogo-play.net/ajax.php');
+    url.searchParams.set('id', videoId);
+
+    const res = await this.httpService.get(url.toString()).toPromise();
+
+    return (res.data.source as any[]).map(s => ({
+      name: s.label,
+      link: s.file
+    }));
+
+    // Another Way.
+    /*
     const url = new URL('https://gogo-play.net/download');
     url.searchParams.set('id', videoId);
 
@@ -216,5 +228,6 @@ export class GoGoAnimeService {
     });
 
     return links;
+    */
   }
 }
