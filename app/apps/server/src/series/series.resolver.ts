@@ -20,4 +20,12 @@ export class SeriesResolver {
   async series(@Args('uuid') uuid: string): Promise<Series> {
     return this.service.repo.get(uuid);
   }
+
+  @Query(() => SeriesPaginatedData)
+  async seriesSearch(
+    @Args('query') query: string,
+    @Args('option', { nullable: true }) option?: PaginationQuery
+  ): Promise<SeriesPaginatedData> {
+    return this.service.search(query, option);
+  }
 }
