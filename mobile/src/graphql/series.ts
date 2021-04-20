@@ -15,21 +15,21 @@ export type DASHBOARD_ANIMES_TYPE = {
 
 export const GET_DASHBOARD_ANIMES = gql`
   query TopAnimes {
-    topAnimes: seriesList(query: { start: 1230, end: 1235 }) {
+    topAnimes: seriesList(query: { offset: 1330, limit: 20 }) {
       data {
         uuid
         thumbnail
         title
       }
     }
-    trendingAnimes: seriesList(query: { start: 1330, end: 1335 }) {
+    trendingAnimes: seriesList(query: { offset: 1430, limit: 20 }) {
       data {
         uuid
         thumbnail
         title
       }
     }
-    myCollections: seriesList(query: { start: 130, end: 135 }) {
+    myCollections: seriesList(query: { offset: 110, limit: 20 }) {
       data {
         uuid
         thumbnail

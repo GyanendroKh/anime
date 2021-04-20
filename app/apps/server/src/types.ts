@@ -1,6 +1,6 @@
 export interface IPaginatedQuery {
-  start: number;
-  end: number;
+  offset: number;
+  limit: number;
 }
 
 export type IPaginatedData<T extends any> = IPaginatedQuery & {

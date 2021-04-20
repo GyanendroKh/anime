@@ -41,9 +41,12 @@ export type ISeriesBasic = {
   thumbnail: string;
 };
 
-export interface IPaginatedData<T extends any> {
-  start: number;
-  end: number;
+export interface IPaginatedQuery {
+  offset: number;
+  limit: number;
+}
+
+export interface IPaginatedData<T extends any> extends IPaginatedQuery {
   count: number;
   data: T[];
 }

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Episode, EpisodeRepo } from '@app/database';
 import { IPaginatedData, IPaginatedQuery } from '../types';
 import { GoGoAnimeService } from '../../../spider/src/go-go-anime/go-go-anime.service';
+import { DEFAULT_PAGINATION } from '../dto';
 
 @Injectable()
 export class EpisodeService {
@@ -12,19 +13,12 @@ export class EpisodeService {
 
   async list(
     seriesUuid: string,
-    query: IPaginatedQuery = {
-      start: 1,
-      end: 20
-    }
+    query: IPaginatedQuery = DEFAULT_PAGINATION
   ): Promise<IPaginatedData<Episode>> {
-    const start = Math.max(query.start, 1);
-    const end = Math.max(query.end, 1);
-
     const [episodes, count] = await this.repo.list(seriesUuid, query);
 
     return {
-      start,
-      end,
+      ...query,
       count,
       data: episodes
     };

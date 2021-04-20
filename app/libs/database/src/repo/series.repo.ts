@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { IPaginatedQuery } from '../../../../apps/server/src/types';
 import { Series } from '../entity';
 
 @Injectable()
@@ -10,13 +11,10 @@ export class SeriesRepo {
     private repo: Repository<Series>
   ) {}
 
-  async list(start: number, end: number) {
-    const skip = start - 1;
-    const take = Math.max(0, end - start) + 1;
-
+  async list({ offset, limit }: IPaginatedQuery) {
     return await this.repo.findAndCount({
-      skip,
-      take,
+      skip: offset,
+      take: limit,
       relations: ['genres', 'episodes']
     });
   }

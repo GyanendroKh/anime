@@ -13,18 +13,15 @@ export class EpisodeRepo {
     private readonly videoRepo: Repository<GoGoAnimeEpisode>
   ) {}
 
-  async list(seriesId: string, { start, end }: IPaginatedQuery) {
-    const skip = start - 1;
-    const take = Math.max(0, end - start) + 1;
-
+  async list(seriesId: string, { limit, offset }: IPaginatedQuery) {
     const result = await this.repo
       .createQueryBuilder('e')
       .select()
       .leftJoin('e.series', 's')
       .where('s.uuid = :seriesId')
       .setParameter('seriesId', seriesId)
-      .skip(skip)
-      .take(take)
+      .skip(offset)
+      .take(limit)
       .orderBy('e.number')
       .getManyAndCount();
 

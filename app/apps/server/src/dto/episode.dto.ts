@@ -1,5 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { GoGoAnimeEpisode } from '../../../../libs/database/src';
+import { GoGoAnimeEpisode } from '@app/database';
 import { IAnimeVideLink } from '../../../spider/src/go-go-anime/go-go-anime.interface';
 
 @ObjectType()

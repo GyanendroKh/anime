@@ -1,24 +1,34 @@
-import { Field, Int, ObjectType, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { Episode, Series } from '@app/database';
 import { IPaginatedData, IPaginatedQuery } from '../types';
 
+export const DEFAULT_PAGINATION: IPaginatedQuery = {
+  offset: 0,
+  limit: 20
+};
+
 @InputType()
 export class PaginationQuery implements IPaginatedQuery {
-  @Field(() => Int)
-  start: number;
+  @Field(() => Int, { nullable: true })
+  offset: number;
 
-  @Field(() => Int)
-  end: number;
+  @Field(() => Int, { nullable: true })
+  limit: number;
 }
 
 @ObjectType()
-export class SeriesPaginatedData implements IPaginatedData<Series> {
+class PaginationQueryObject implements IPaginatedQuery {
   @Field(() => Int)
-  start: number;
+  offset: number;
 
   @Field(() => Int)
-  end: number;
+  limit: number;
+}
 
+@ObjectType()
+export class SeriesPaginatedData
+  extends PaginationQueryObject
+  implements IPaginatedData<Series> {
   @Field(() => Int)
   count: number;
 
@@ -27,13 +37,9 @@ export class SeriesPaginatedData implements IPaginatedData<Series> {
 }
 
 @ObjectType()
-export class EpisodePaginatedData implements IPaginatedData<Episode> {
-  @Field(() => Int)
-  start: number;
-
-  @Field(() => Int)
-  end: number;
-
+export class EpisodePaginatedData
+  extends PaginationQueryObject
+  implements IPaginatedData<Episode> {
   @Field(() => Int)
   count: number;
 
