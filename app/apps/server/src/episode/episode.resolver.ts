@@ -3,6 +3,7 @@ import { Episode } from '@app/database';
 import { EpisodePaginatedData, PaginationQuery } from '../dto';
 import { EpisodeService } from './episode.service';
 import { EpisodeVideo } from '../dto/episode.dto';
+import { PaginationDefaultPipe } from '../pagination.pipe';
 
 @Resolver(() => Episode)
 export class EpisodeResolver {
@@ -11,7 +12,8 @@ export class EpisodeResolver {
   @Query(() => EpisodePaginatedData)
   async episodes(
     @Args('seriesId') seriesId: string,
-    @Args('query', { nullable: true }) query: PaginationQuery
+    @Args('query', { nullable: true }, PaginationDefaultPipe)
+    query: PaginationQuery
   ): Promise<EpisodePaginatedData> {
     const res = await this.service.list(seriesId, query);
 

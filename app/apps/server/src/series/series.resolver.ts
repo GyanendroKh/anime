@@ -2,6 +2,7 @@ import { Resolver, Query, Args } from '@nestjs/graphql';
 import { Series } from '@app/database';
 import { SeriesService } from './series.service';
 import { PaginationQuery, SeriesPaginatedData } from '../dto';
+import { PaginationDefaultPipe } from '../pagination.pipe';
 
 @Resolver(() => Series)
 export class SeriesResolver {
@@ -9,7 +10,8 @@ export class SeriesResolver {
 
   @Query(() => SeriesPaginatedData)
   async seriesList(
-    @Args('query', { nullable: true }) query: PaginationQuery
+    @Args('query', { nullable: true }, PaginationDefaultPipe)
+    query: PaginationQuery
   ): Promise<SeriesPaginatedData> {
     const res = await this.service.list(query);
 
@@ -24,7 +26,8 @@ export class SeriesResolver {
   @Query(() => SeriesPaginatedData)
   async seriesSearch(
     @Args('query') query: string,
-    @Args('option', { nullable: true }) option?: PaginationQuery
+    @Args('option', { nullable: true }, PaginationDefaultPipe)
+    option?: PaginationQuery
   ): Promise<SeriesPaginatedData> {
     return this.service.search(query, option);
   }
