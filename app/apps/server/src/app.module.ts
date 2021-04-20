@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { SeriesModule } from './series/series.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { EpisodeModule } from './episode/episode.module';
+import { GenreModule } from './genre/genre.module';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { EpisodeModule } from './episode/episode.module';
       autoSchemaFile: true
     }),
     SeriesModule,
-    EpisodeModule
+    EpisodeModule,
+    GenreModule
   ],
   controllers: [AppController],
   providers: [AppService]
