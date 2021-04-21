@@ -52,7 +52,7 @@ export class SeriesService {
       .where('g.uuid = :uuid')
       .setParameter('uuid', genre)
       .take(limit)
-      .offset(offset)
+      .skip(offset)
       .getManyAndCount();
 
     return {
