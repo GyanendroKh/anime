@@ -5,18 +5,20 @@ import { FlatList } from 'react-native-gesture-handler';
 import { ActivityIndicator, Searchbar, Title } from 'react-native-paper';
 import { SeriesItem } from '../components';
 import { SearchSeriesType, SEARCH_SERIES } from '../graphql/series';
-import { ExploreNavProps } from '../navigators';
+import { ExploreNavProps, HomeNavProps } from '../navigators';
 import styles2 from '../styles';
+import { ISeriesBasic } from '../types';
 
 const { width } = Dimensions.get('screen');
 const imageWidth = width / 2 - 5 * 2;
 const imageHeight = imageWidth * 1.35;
 
 type SearchProps = {
-  goBack: () => void;
+  goBack?: () => void;
+  onPress?: (series: ISeriesBasic) => void;
 };
 
-const Search: FC<SearchProps> = ({ goBack }) => {
+const Search: FC<SearchProps> = ({ goBack, onPress }) => {
   const [search, setSearch] = useState('');
   const { data, loading, fetchMore } = useQuery<SearchSeriesType>(
     SEARCH_SERIES,
@@ -69,7 +71,6 @@ const Search: FC<SearchProps> = ({ goBack }) => {
               const limit = Math.min(count - series.length, 20);
 
               if (!loading) {
-                console.log('Fetching');
                 await fetchMore({
                   variables: {
                     option: {
@@ -90,6 +91,11 @@ const Search: FC<SearchProps> = ({ goBack }) => {
                   height: imageHeight,
                   width: imageWidth
                 }}
+                onPress={() => {
+                  if (onPress) {
+                    onPress(item);
+                  }
+                }}
               />
             );
           }}
@@ -106,10 +112,32 @@ const Search: FC<SearchProps> = ({ goBack }) => {
   );
 };
 
+export const HomeSearch: FC<HomeNavProps<'Search'>> = ({ navigation }) => {
+  return (
+    <Search
+      goBack={navigation.goBack}
+      onPress={series => {
+        navigation.push('Series', {
+          series
+        });
+      }}
+    />
+  );
+};
+
 export const ExploreSearch: FC<ExploreNavProps<'Search'>> = ({
   navigation
 }) => {
-  return <Search goBack={navigation.goBack} />;
+  return (
+    <Search
+      goBack={navigation.goBack}
+      onPress={series => {
+        navigation.push('Series', {
+          series
+        });
+      }}
+    />
+  );
 };
 
 const styles = StyleSheet.create({

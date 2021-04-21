@@ -68,7 +68,6 @@ export const Genre: FC<ExploreNavProps<'Genres'>> = ({
           }}
           onEndReachedThreshold={0.35}
           refreshing={loading}
-          nestedScrollEnabled={true}
           numColumns={2}
           renderItem={({ item }) => {
             return (
@@ -78,6 +77,9 @@ export const Genre: FC<ExploreNavProps<'Genres'>> = ({
                 image={{
                   height: imageHeight,
                   width: imageWidth
+                }}
+                onPress={() => {
+                  navigation.navigate('Series', { series: item });
                 }}
               />
             );

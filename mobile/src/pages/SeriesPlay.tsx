@@ -13,7 +13,7 @@ import Video from 'react-native-video';
 import { theme } from '../constants';
 import { GetVideoType, GET_VIDEO } from '../graphql/series';
 import Icon from '../Icon';
-import { HomeNavProps } from '../navigators';
+import { ExploreNavProps, HomeNavProps } from '../navigators';
 import styles from '../styles';
 import { ISeries } from '../types';
 
@@ -162,6 +162,12 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({ anime, episodeIndex }) => {
 };
 
 export const HomSeriesPlay: FC<HomeNavProps<'SeriesPlay'>> = ({
+  route: { params }
+}) => {
+  return <SeriesPlay {...params} />;
+};
+
+export const ExploreSeriesPlay: FC<ExploreNavProps<'SeriesPlay'>> = ({
   route: { params }
 }) => {
   return <SeriesPlay {...params} />;

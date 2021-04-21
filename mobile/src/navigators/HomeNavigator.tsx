@@ -5,12 +5,14 @@ import {
 } from '@react-navigation/stack';
 import { NavProps } from '../types';
 import { MainNavProps } from './MainNavigator';
-import { Dashboard, HomeSeries, HomSeriesPlay } from '../pages';
+import { Dashboard, HomeSearch, HomeSeries, HomSeriesPlay } from '../pages';
 import { SeriesParamList } from './SeriesNavigator';
+import { SearchParamList } from './SearchNavigator';
 
 type HomeParamList = {
   Dashboard: undefined;
-} & SeriesParamList;
+} & SeriesParamList &
+  SearchParamList;
 
 export type HomeNavProps<T extends keyof HomeParamList> = NavProps<
   HomeParamList,
@@ -26,6 +28,7 @@ export const HomeNavigator: FC<MainNavProps<'Home'>> = () => {
       <Stack.Screen name="Dashboard" component={Dashboard} />
       <Stack.Screen name="Series" component={HomeSeries} />
       <Stack.Screen name="SeriesPlay" component={HomSeriesPlay} />
+      <Stack.Screen name="Search" component={HomeSearch} />
     </Stack.Navigator>
   );
 };
