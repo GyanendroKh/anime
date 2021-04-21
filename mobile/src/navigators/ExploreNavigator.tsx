@@ -3,8 +3,9 @@ import {
   StackNavigationProp
 } from '@react-navigation/stack';
 import React, { FC } from 'react';
-import { Browse, ExploreSeries, Genre } from '../pages';
+import { Browse, ExploreSeries, Genre, ExploreSearch } from '../pages';
 import { IGenre, NavProps } from '../types';
+import { SearchParamList } from './SearchNavigator';
 import { SeriesParamList } from './SeriesNavigator';
 
 type ExploreParamList = {
@@ -12,7 +13,8 @@ type ExploreParamList = {
   Genres: {
     genre: IGenre;
   };
-} & SeriesParamList;
+} & SeriesParamList &
+  SearchParamList;
 
 export type ExploreNavProps<T extends keyof ExploreParamList> = NavProps<
   ExploreParamList,
@@ -28,6 +30,7 @@ export const ExploreNavigator: FC = () => {
       <Stack.Screen name="Browse" component={Browse} />
       <Stack.Screen name="Series" component={ExploreSeries} />
       <Stack.Screen name="Genres" component={Genre} />
+      <Stack.Screen name="Search" component={ExploreSearch} />
     </Stack.Navigator>
   );
 };

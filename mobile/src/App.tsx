@@ -5,7 +5,31 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 import { RootNavigator } from './navigators';
 import { theme } from './constants';
-import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
+import {
+  ApolloClient,
+  ApolloProvider,
+  FieldPolicy,
+  InMemoryCache
+} from '@apollo/client';
+import { IPaginatedData } from './types';
+
+const paginationMerge = (
+  keyArgs: FieldPolicy<any>['keyArgs'] = false
+): FieldPolicy<IPaginatedData<any>> => {
+  return {
+    keyArgs,
+    merge(existing, incoming) {
+      if (existing) {
+        return {
+          ...incoming,
+          data: [...existing.data, ...incoming.data]
+        };
+      }
+
+      return incoming;
+    }
+  };
+};
 
 const apolloClient = new ApolloClient({
   uri: 'http://192.168.29.106:3000/graphql',
@@ -13,19 +37,8 @@ const apolloClient = new ApolloClient({
     typePolicies: {
       Query: {
         fields: {
-          seriesListByGenre: {
-            keyArgs: ['genre'],
-            merge(existing, incoming) {
-              if (existing) {
-                return {
-                  ...incoming,
-                  data: [...existing.data, ...incoming.data]
-                };
-              }
-
-              return incoming;
-            }
-          }
+          seriesListByGenre: paginationMerge(['genre']),
+          seriesSearch: paginationMerge(['query'])
         }
       }
     }

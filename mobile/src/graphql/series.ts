@@ -127,3 +127,22 @@ export const GET_SERIES_BY_GENRE = gql`
     }
   }
 `;
+
+export type SearchSeriesType = {
+  seriesSearch: IPaginatedData<ISeriesBasic>;
+};
+
+export const SEARCH_SERIES = gql`
+  query SearchSeries($query: String!, $option: PaginationQuery) {
+    seriesSearch(query: $query, option: $option) {
+      limit
+      offset
+      count
+      data {
+        uuid
+        title
+        thumbnail
+      }
+    }
+  }
+`;

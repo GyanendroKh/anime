@@ -20,6 +20,12 @@ export const Browse: FC<ExploreNavProps<'Browse'>> = ({ navigation }) => {
       <Animated.View style={[styles2.appBar, appBarStyle]}>
         <Appbar.Header>
           <Appbar.Content title="Anime" />
+          <Appbar.Action
+            icon="magnify"
+            onPress={() => {
+              navigation.navigate('Search');
+            }}
+          />
         </Appbar.Header>
       </Animated.View>
       <Animated.ScrollView style={contentStyle} onScroll={scrollHandler}>
