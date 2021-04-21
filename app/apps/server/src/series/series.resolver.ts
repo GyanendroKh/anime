@@ -31,4 +31,13 @@ export class SeriesResolver {
   ): Promise<SeriesPaginatedData> {
     return this.service.search(query, option);
   }
+
+  @Query(() => SeriesPaginatedData)
+  async seriesListByGenre(
+    @Args('genre') genre: string,
+    @Args('query', { nullable: true }, PaginationDefaultPipe)
+    query: PaginationQuery
+  ): Promise<SeriesPaginatedData> {
+    return this.service.listByGenre(genre, query);
+  }
 }

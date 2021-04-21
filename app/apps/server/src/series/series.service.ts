@@ -40,4 +40,26 @@ export class SeriesService {
       count
     };
   }
+
+  async listByGenre(
+    genre: string,
+    { limit, offset }: IPaginatedQuery = DEFAULT_PAGINATION
+  ): Promise<IPaginatedData<Series>> {
+    const [data, count] = await this.repo.repo
+      .createQueryBuilder('s')
+      .leftJoinAndSelect('s.genres', 'g')
+      .leftJoinAndSelect('s.episodes', 'e')
+      .where('g.uuid = :uuid')
+      .setParameter('uuid', genre)
+      .take(limit)
+      .offset(offset)
+      .getManyAndCount();
+
+    return {
+      limit,
+      offset,
+      count,
+      data
+    };
+  }
 }
