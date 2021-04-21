@@ -1,5 +1,5 @@
 import { gql } from '@apollo/client';
-import { ISeries, ISeriesBasic } from '../types';
+import { IPaginatedData, ISeries, ISeriesBasic } from '../types';
 
 export type DASHBOARD_ANIMES_TYPE = {
   topAnimes: {
@@ -104,6 +104,25 @@ export const GET_VIDEO = gql`
       links {
         name
         link
+      }
+    }
+  }
+`;
+
+export type GetSeriesByGenreType = {
+  seriesListByGenre: IPaginatedData<ISeriesBasic>;
+};
+
+export const GET_SERIES_BY_GENRE = gql`
+  query GetSeriesByGenre($genre: String!, $query: PaginationQuery) {
+    seriesListByGenre(genre: $genre, query: $query) {
+      count
+      limit
+      offset
+      data {
+        uuid
+        title
+        thumbnail
       }
     }
   }

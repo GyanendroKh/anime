@@ -3,12 +3,15 @@ import {
   StackNavigationProp
 } from '@react-navigation/stack';
 import React, { FC } from 'react';
-import { Browse, ExploreSeries } from '../pages';
-import { NavProps } from '../types';
+import { Browse, ExploreSeries, Genre } from '../pages';
+import { IGenre, NavProps } from '../types';
 import { SeriesParamList } from './SeriesNavigator';
 
 type ExploreParamList = {
   Browse: undefined;
+  Genres: {
+    genre: IGenre;
+  };
 } & SeriesParamList;
 
 export type ExploreNavProps<T extends keyof ExploreParamList> = NavProps<
@@ -24,6 +27,7 @@ export const ExploreNavigator: FC = () => {
     <Stack.Navigator initialRouteName="Browse" headerMode="none">
       <Stack.Screen name="Browse" component={Browse} />
       <Stack.Screen name="Series" component={ExploreSeries} />
+      <Stack.Screen name="Genres" component={Genre} />
     </Stack.Navigator>
   );
 };

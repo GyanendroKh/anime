@@ -9,7 +9,7 @@ import { useCollapsibleAppbar } from '../hooks';
 import { ExploreNavProps } from '../navigators';
 import styles from '../styles';
 
-export const Browse: FC<ExploreNavProps<'Browse'>> = ({}) => {
+export const Browse: FC<ExploreNavProps<'Browse'>> = ({ navigation }) => {
   const { scrollHandler, appBarStyle, contentStyle } = useCollapsibleAppbar({
     appBarHeight: APPBAR_HEIGHT
   });
@@ -37,7 +37,9 @@ export const Browse: FC<ExploreNavProps<'Browse'>> = ({}) => {
                     key={g.uuid}
                     title={g.name}
                     onPress={() => {
-                      console.log(g.uuid);
+                      navigation.navigate('Genres', {
+                        genre: g
+                      });
                     }}
                   />
                 );
