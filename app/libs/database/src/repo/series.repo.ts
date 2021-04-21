@@ -8,7 +8,7 @@ import { Series } from '../entity';
 export class SeriesRepo {
   constructor(
     @InjectRepository(Series)
-    private repo: Repository<Series>
+    public repo: Repository<Series>
   ) {}
 
   async list({ offset, limit }: IPaginatedQuery) {
