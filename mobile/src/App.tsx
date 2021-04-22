@@ -1,8 +1,9 @@
 import 'react-native-gesture-handler';
-import React, { FC } from 'react';
+import React, { FC, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
+import Orientation from 'react-native-orientation-locker';
 import { RootNavigator } from './navigators';
 import { theme } from './constants';
 import {
@@ -46,6 +47,10 @@ const apolloClient = new ApolloClient({
 });
 
 export const App: FC = () => {
+  useEffect(() => {
+    Orientation.lockToPortrait();
+  }, []);
+
   return (
     <ApolloProvider client={apolloClient}>
       <PaperProvider theme={theme}>

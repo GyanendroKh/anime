@@ -1,6 +1,12 @@
 import { useQuery } from '@apollo/client';
-import React, { FC, useRef, useState } from 'react';
-import { View, Dimensions, Image, StyleSheet } from 'react-native';
+import React, { FC, useEffect, useRef, useState } from 'react';
+import {
+  View,
+  Dimensions,
+  Image,
+  StyleSheet,
+  ToastAndroid
+} from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import {
   ActivityIndicator,
@@ -9,26 +15,48 @@ import {
   Text,
   Title
 } from 'react-native-paper';
-import Video from 'react-native-video';
+import Video from 'react-native-video-controls';
+import BaseVideo from 'react-native-video';
 import { theme } from '../constants';
 import { GetVideoType, GET_VIDEO } from '../graphql/series';
 import Icon from '../Icon';
 import { ExploreNavProps, HomeNavProps } from '../navigators';
 import styles from '../styles';
 import { ISeries } from '../types';
+import Orientation from 'react-native-orientation-locker';
 
 export type SeriesPlayProps = {
   anime: ISeries;
   episodeIndex: number;
+  onBack?: () => void;
 };
 
-const { width: baseWidth } = Dimensions.get('window');
+const { width: baseWidth, height: baseHeight } = Dimensions.get('window');
 
-export const SeriesPlay: FC<SeriesPlayProps> = ({ anime, episodeIndex }) => {
-  const video = useRef<Video>();
-  const [videoHeight, setVideoHeight] = useState<number>(() => {
-    return (9 / 16) * baseWidth;
+export const SeriesPlay: FC<SeriesPlayProps> = ({
+  anime,
+  episodeIndex,
+  onBack
+}) => {
+  const video = useRef<BaseVideo>();
+  const [isFullScreen, setFullScreen] = useState(() => {
+    const orientation = Orientation.getInitialOrientation();
+
+    return (
+      orientation === 'LANDSCAPE-LEFT' || orientation === 'LANDSCAPE-RIGHT'
+    );
   });
+
+  const [videoSize, setVideSize] = useState<{
+    height: number;
+    width: number;
+  } | null>(null);
+  const [videoHeight, setVideoHeight] = useState<number>(() => {
+    const height = isFullScreen ? baseHeight : baseWidth;
+
+    return (9 / 16) * height;
+  });
+
   const [selectEpisode, setSelectedEpisode] = useState(episodeIndex);
 
   const { data, loading } = useQuery<GetVideoType>(GET_VIDEO, {
@@ -38,6 +66,28 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({ anime, episodeIndex }) => {
   });
 
   const videoLink = data?.episodeVideo.links[0].link;
+
+  useEffect(() => {
+    if (isFullScreen) {
+      Orientation.lockToLandscape();
+    } else {
+      Orientation.lockToPortrait();
+    }
+
+    return () => {
+      Orientation.lockToPortrait();
+    };
+  }, [isFullScreen]);
+
+  useEffect(() => {
+    const height = isFullScreen ? baseHeight : baseWidth;
+
+    if (videoSize) {
+      const ratio = videoSize.height / videoSize.width;
+
+      setVideoHeight(ratio * height);
+    }
+  }, [isFullScreen, videoSize]);
 
   return (
     <>
@@ -52,11 +102,14 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({ anime, episodeIndex }) => {
         {loading && <ActivityIndicator size={25} />}
         {!loading && (
           <Video
-            ref={ref => (video.current = ref || undefined)}
+            ref={ref => (video.current = ref?.player.ref || undefined)}
             style={styles.absolute0}
             resizeMode="contain"
             playInBackground={false}
             playWhenInactive={false}
+            fullscreen={isFullScreen}
+            toggleResizeModeOnFullscreen={true}
+            onBack={onBack}
             source={{
               uri: videoLink,
               headers: {
@@ -65,20 +118,20 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({ anime, episodeIndex }) => {
                   'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.72 Safari/537.36'
               }
             }}
-            onLoadStart={() => {
-              console.log('Started Loading...');
-            }}
             onLoad={({ naturalSize }) => {
-              const { width, height } = naturalSize;
-              const newHeight = (height / width) * baseWidth;
-              setVideoHeight(newHeight);
+              setVideSize(naturalSize);
             }}
             onError={e => {
-              console.log(e.error.errorString);
-              console.log('Error:', e);
+              ToastAndroid.show('Error Playing Video!', ToastAndroid.SHORT);
+              ToastAndroid.show(e.error.errorString, ToastAndroid.SHORT);
+            }}
+            onEnterFullscreen={() => {
+              setFullScreen(true);
+            }}
+            onExitFullscreen={() => {
+              setFullScreen(false);
             }}
             onVideoError={console.log}
-            controls={true}
           />
         )}
       </View>
@@ -162,15 +215,17 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({ anime, episodeIndex }) => {
 };
 
 export const HomSeriesPlay: FC<HomeNavProps<'SeriesPlay'>> = ({
+  navigation: { goBack },
   route: { params }
 }) => {
-  return <SeriesPlay {...params} />;
+  return <SeriesPlay {...params} onBack={goBack} />;
 };
 
 export const ExploreSeriesPlay: FC<ExploreNavProps<'SeriesPlay'>> = ({
+  navigation: { goBack },
   route: { params }
 }) => {
-  return <SeriesPlay {...params} />;
+  return <SeriesPlay {...params} onBack={goBack} />;
 };
 
 const styles2 = StyleSheet.create({

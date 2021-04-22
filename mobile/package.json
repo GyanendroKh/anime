@@ -21,12 +21,14 @@
     "react-native": "0.64.0",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-linear-gradient": "^2.5.6",
+    "react-native-orientation-locker": "^1.2.0",
     "react-native-paper": "^4.7.2",
     "react-native-reanimated": "^2.0.0",
     "react-native-safe-area-context": "^3.2.0",
     "react-native-screens": "^2.18.1",
     "react-native-vector-icons": "^8.1.0",
     "react-native-video": "^5.1.1",
+    "react-native-video-controls": "^2.7.1",
     "zustand": "^3.3.3"
   },
   "devDependencies": {

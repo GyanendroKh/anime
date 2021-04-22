@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
 import { StyleSheet } from 'react-native';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import {
   BottomTabNavigationProp,
   createBottomTabNavigator
@@ -29,6 +30,16 @@ export const MainNavigator: FC = () => {
       tabBarOptions={{
         style: styles.tabWrapper
       }}
+      screenOptions={({ route }) => {
+        const routeName = getFocusedRouteNameFromRoute(route);
+
+        const toHide = ['Series', 'SeriesPlay', 'Genres', 'Search'];
+        const shouldHide = toHide.includes(routeName ?? '');
+
+        return {
+          tabBarVisible: !shouldHide
+        };
+      }}
     >
       <Tab.Screen
         name="Home"
@@ -49,7 +60,5 @@ export const MainNavigator: FC = () => {
 };
 
 const styles = StyleSheet.create({
-  tabWrapper: {
-    margin: 8
-  }
+  tabWrapper: {}
 });
