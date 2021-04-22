@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client';
-import React, { FC, useEffect, useRef, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import {
   View,
   Dimensions,
@@ -16,7 +16,6 @@ import {
   Title
 } from 'react-native-paper';
 import Video from 'react-native-video-controls';
-import BaseVideo from 'react-native-video';
 import { theme } from '../constants';
 import { GetVideoType, GET_VIDEO } from '../graphql/series';
 import Icon from '../Icon';
@@ -31,14 +30,13 @@ export type SeriesPlayProps = {
   onBack?: () => void;
 };
 
-const { width: baseWidth, height: baseHeight } = Dimensions.get('window');
+const { width: baseWidth } = Dimensions.get('window');
 
 export const SeriesPlay: FC<SeriesPlayProps> = ({
   anime,
   episodeIndex,
   onBack
 }) => {
-  const video = useRef<BaseVideo>();
   const [isFullScreen, setFullScreen] = useState(() => {
     const orientation = Orientation.getInitialOrientation();
 
@@ -47,14 +45,8 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({
     );
   });
 
-  const [videoSize, setVideSize] = useState<{
-    height: number;
-    width: number;
-  } | null>(null);
   const [videoHeight, setVideoHeight] = useState<number>(() => {
-    const height = isFullScreen ? baseHeight : baseWidth;
-
-    return (9 / 16) * height;
+    return (9 / 16) * baseWidth;
   });
 
   const [selectEpisode, setSelectedEpisode] = useState(episodeIndex);
@@ -79,36 +71,26 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({
     };
   }, [isFullScreen]);
 
-  useEffect(() => {
-    const height = isFullScreen ? baseHeight : baseWidth;
-
-    if (videoSize) {
-      const ratio = videoSize.height / videoSize.width;
-
-      setVideoHeight(ratio * height);
-    }
-  }, [isFullScreen, videoSize]);
-
   return (
     <>
       <View
         style={[
           styles.center,
-          {
-            height: videoHeight
-          }
+          isFullScreen
+            ? styles.flex1
+            : {
+                height: videoHeight
+              }
         ]}
       >
         {loading && <ActivityIndicator size={25} />}
         {!loading && (
           <Video
-            ref={ref => (video.current = ref?.player.ref || undefined)}
-            style={styles.absolute0}
+            style={[styles.fill]}
             resizeMode="contain"
             playInBackground={false}
             playWhenInactive={false}
             fullscreen={isFullScreen}
-            toggleResizeModeOnFullscreen={true}
             onBack={onBack}
             source={{
               uri: videoLink,
@@ -118,8 +100,8 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({
                   'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.72 Safari/537.36'
               }
             }}
-            onLoad={({ naturalSize }) => {
-              setVideSize(naturalSize);
+            onLoad={({ naturalSize: { height, width } }) => {
+              setVideoHeight((height / width) * baseWidth);
             }}
             onError={e => {
               ToastAndroid.show('Error Playing Video!', ToastAndroid.SHORT);
@@ -135,81 +117,87 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({
           />
         )}
       </View>
-      <Surface style={styles2.detail}>
-        <View style={styles.flexRow}>
-          <Image
-            style={styles2.detailImage}
-            source={{ uri: anime.thumbnail }}
-            resizeMode="cover"
-            resizeMethod="auto"
-          />
-          <View style={styles2.detailInfo}>
+      {!isFullScreen && (
+        <>
+          <Surface style={styles2.detail}>
             <View style={styles.flexRow}>
-              <Text style={styles2.detailInfoTitle}>{anime.title} - </Text>
-              <Text style={styles2.detailInfoTitle}>{selectEpisode + 1}</Text>
+              <Image
+                style={styles2.detailImage}
+                source={{ uri: anime.thumbnail }}
+                resizeMode="cover"
+                resizeMethod="auto"
+              />
+              <View style={styles2.detailInfo}>
+                <View style={styles.flexRow}>
+                  <Text style={styles2.detailInfoTitle}>{anime.title} - </Text>
+                  <Text style={styles2.detailInfoTitle}>
+                    {selectEpisode + 1}
+                  </Text>
+                </View>
+                <Text>{anime.episodes.length} Episodes</Text>
+                <Text>{anime.status}</Text>
+              </View>
             </View>
-            <Text>{anime.episodes.length} Episodes</Text>
-            <Text>{anime.status}</Text>
-          </View>
-        </View>
-      </Surface>
-      <View style={styles.height10} />
-      <ScrollView>
-        <Surface style={styles2.episodesSection}>
-          <Title>Episodes</Title>
-          <List.Section>
-            {[...anime.episodes].reverse().map((a, idx) => {
-              const borderRadius = {
-                borderTopLeftRadius: idx === 0 ? 10 : 0,
-                borderTopRightRadius: idx === 0 ? 10 : 0,
-                borderBottomLeftRadius:
-                  idx === anime.episodes.length - 1 ? 10 : 0,
-                borderBottomRightRadius:
-                  idx === anime.episodes.length - 1 ? 10 : 0
-              };
+          </Surface>
+          <View style={styles.height10} />
+          <ScrollView>
+            <Surface style={styles2.episodesSection}>
+              <Title>Episodes</Title>
+              <List.Section>
+                {[...anime.episodes].reverse().map((a, idx) => {
+                  const borderRadius = {
+                    borderTopLeftRadius: idx === 0 ? 10 : 0,
+                    borderTopRightRadius: idx === 0 ? 10 : 0,
+                    borderBottomLeftRadius:
+                      idx === anime.episodes.length - 1 ? 10 : 0,
+                    borderBottomRightRadius:
+                      idx === anime.episodes.length - 1 ? 10 : 0
+                  };
 
-              return (
-                <List.Item
-                  key={a.uuid}
-                  title={a.title}
-                  style={[
-                    styles2.episodes,
-                    borderRadius,
-                    idx === selectEpisode ? styles2.episodeActive : {}
-                  ]}
-                  right={() => {
-                    if (selectEpisode !== idx) {
-                      return null;
-                    }
+                  return (
+                    <List.Item
+                      key={a.uuid}
+                      title={a.title}
+                      style={[
+                        styles2.episodes,
+                        borderRadius,
+                        idx === selectEpisode ? styles2.episodeActive : {}
+                      ]}
+                      right={() => {
+                        if (selectEpisode !== idx) {
+                          return null;
+                        }
 
-                    if (loading) {
-                      return (
-                        <ActivityIndicator
-                          size={25}
-                          color={theme.colors.onSurface}
-                          style={styles.alignSelfCenter}
-                        />
-                      );
-                    }
+                        if (loading) {
+                          return (
+                            <ActivityIndicator
+                              size={25}
+                              color={theme.colors.onSurface}
+                              style={styles.alignSelfCenter}
+                            />
+                          );
+                        }
 
-                    return (
-                      <Icon
-                        name="play"
-                        size={25}
-                        color={theme.colors.onSurface}
-                        style={styles.alignSelfCenter}
-                      />
-                    );
-                  }}
-                  onPress={() => {
-                    setSelectedEpisode(idx);
-                  }}
-                />
-              );
-            })}
-          </List.Section>
-        </Surface>
-      </ScrollView>
+                        return (
+                          <Icon
+                            name="play"
+                            size={25}
+                            color={theme.colors.onSurface}
+                            style={styles.alignSelfCenter}
+                          />
+                        );
+                      }}
+                      onPress={() => {
+                        setSelectedEpisode(idx);
+                      }}
+                    />
+                  );
+                })}
+              </List.Section>
+            </Surface>
+          </ScrollView>
+        </>
+      )}
     </>
   );
 };
