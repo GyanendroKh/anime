@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { Episode, EpisodeRepo } from '@app/database';
+import { Cache } from 'cache-manager';
 import { IPaginatedData, IPaginatedQuery } from '../types';
 import { GoGoAnimeService } from '../../../spider/src/go-go-anime/go-go-anime.service';
 import { DEFAULT_PAGINATION } from '../dto';
@@ -8,7 +9,9 @@ import { DEFAULT_PAGINATION } from '../dto';
 export class EpisodeService {
   constructor(
     public readonly repo: EpisodeRepo,
-    private readonly spiderService: GoGoAnimeService
+    private readonly spiderService: GoGoAnimeService,
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager: Cache
   ) {}
 
   async list(
@@ -39,7 +42,22 @@ export class EpisodeService {
       video.save();
     }
 
-    const links = await this.spiderService.getAnimeVideoLinks(video.videoId);
+    const cacheKey = ['episode', 'video', 'link', video.videoId].join(':');
+    const cacheValue = await this.cacheManager.get<string>(cacheKey);
+
+    const links = await (async () => {
+      if (cacheValue) {
+        return JSON.parse(cacheValue);
+      }
+
+      const res = await this.spiderService.getAnimeVideoLinks(video.videoId);
+
+      await this.cacheManager.set(cacheKey, JSON.stringify(res), {
+        ttl: 100000
+      });
+
+      return res;
+    })();
 
     return {
       episode: video,
