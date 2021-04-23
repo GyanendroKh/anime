@@ -1,9 +1,9 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { GoGoAnimeEpisode } from '@app/database';
-import { IAnimeVideLink } from '../../../spider/src/go-go-anime/go-go-anime.interface';
+import { IAnimeVideoLink } from '../types';
 
 @ObjectType()
-export class AnimeVideoLink implements IAnimeVideLink {
+export class AnimeVideoLink implements IAnimeVideoLink {
   @Field()
   name: string;
 

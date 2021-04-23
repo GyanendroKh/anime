@@ -1,6 +1,6 @@
+import { Queue } from '@anime/data';
 import { BehaviorSubject, EMPTY, Observable, of } from 'rxjs';
 import { concatMap } from 'rxjs/operators';
-import { Queue } from '@anime/data';
 
 export type IRunningCallback = (running: boolean) => void;
 

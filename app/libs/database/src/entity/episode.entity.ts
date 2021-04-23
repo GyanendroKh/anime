@@ -31,6 +31,5 @@ export class Episode extends BaseEntity {
   title: string;
 
   @ManyToOne(() => Series, s => s.episodes)
-  @Field(() => Series)
   series: Series;
 }

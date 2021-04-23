@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IPaginatedQuery } from '../../../../apps/server/src/types';
+import { IPaginatedQuery } from '../types';
 import { Episode, GoGoAnimeEpisode } from '../entity';
 
 @Injectable()

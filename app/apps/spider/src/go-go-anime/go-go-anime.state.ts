@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Queue } from '../../../../libs/data/src';
+import { Queue } from '@anime/data';
 import { INameLinkRet } from './go-go-anime.interface';
 
 @Injectable()

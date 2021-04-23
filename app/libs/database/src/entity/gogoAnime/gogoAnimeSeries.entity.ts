@@ -27,6 +27,5 @@ export class GoGoAnimeSeries extends BaseEntity {
     cascade: true
   })
   @JoinColumn()
-  @Field(() => Series)
   series: Series;
 }

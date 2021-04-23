@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { FindOneOptions, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import {
   Episode,
   Genre,
@@ -7,14 +7,14 @@ import {
   GoGoAnimeSeries,
   Series
 } from '@app/database/entity';
-import { InjectRepository } from '@nestjs/typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
+import { of } from 'rxjs';
+import { concatMap, map, reduce } from 'rxjs/operators';
 import {
   IAnimeEpisodeRet,
   IAnimeInfoRet,
   INameLinkIdRet
 } from './go-go-anime.interface';
-import { of } from 'rxjs';
-import { concatMap, map, reduce } from 'rxjs/operators';
 
 @Injectable()
 export class GoGoAnimeDatabase {

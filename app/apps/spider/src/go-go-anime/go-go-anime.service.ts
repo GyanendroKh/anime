@@ -205,29 +205,5 @@ export class GoGoAnimeService {
       name: s.label,
       link: s.file
     }));
-
-    // Another Way.
-    /*
-    const url = new URL('https://gogo-play.net/download');
-    url.searchParams.set('id', videoId);
-
-    const res = await this.httpService.get(url.toString()).toPromise();
-    const html = res.data;
-
-    const $ = cheerioLoad(html);
-
-    const links: IAnimeVideLink[] = [];
-
-    $('.mirror_link .dowload a[download]').each((_, ele) => {
-      const a = $(ele);
-
-      const text = a.text().replace('Download', '').trim();
-      const href = a.attr('href');
-
-      links.push({ name: text, link: href });
-    });
-
-    return links;
-    */
   }
 }

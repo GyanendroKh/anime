@@ -1,9 +1,8 @@
 import { Resolver, Query, Args } from '@nestjs/graphql';
 import { Episode } from '@app/database';
-import { EpisodePaginatedData, PaginationQuery } from '../dto';
 import { EpisodeService } from './episode.service';
-import { EpisodeVideo } from '../dto/episode.dto';
-import { PaginationDefaultPipe } from '../pagination.pipe';
+import { EpisodePaginatedData, PaginationQuery, EpisodeVideo } from '../dto';
+import { PaginationDefaultPipe } from '../pipe';
 
 @Resolver(() => Episode)
 export class EpisodeResolver {

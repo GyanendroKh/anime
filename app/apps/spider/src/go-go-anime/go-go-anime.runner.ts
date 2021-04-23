@@ -253,32 +253,6 @@ export class GoGoAnimeRunner {
             ...d,
             data: await this.service.getAnimeEpisodes(d.movieId, d.start, d.end)
           };
-
-          // return of(d).pipe(
-          //   concatMap(e =>
-          //     this.service.getAnimeEpisodes(e.movieId, e.start, e.end)
-          //   ),
-          //   concatMap(e => of(...e.episodes)),
-          //   mergeMap(async e => {
-          //     const url = new URL(e.link, this.service.baseUrl);
-          //     const id = await this.service.getAnimeEpisodeId(url.toString());
-
-          //     return {
-          //       ...e,
-          //       id: id
-          //     };
-          //   }, 25),
-          //   reduce((acc, c) => {
-          //     acc.push(c);
-          //     return acc;
-          //   }, [] as INameLinkIdRet[]),
-          //   map<INameLinkIdRet[], IAnimeEpisodeRet<INameLinkIdRet>>(e => {
-          //     return {
-          //       episodes: e,
-          //       movieId: d.movieId
-          //     };
-          //   })
-          // );
         }, this.workerCount.episode),
         map(d => {
           return {

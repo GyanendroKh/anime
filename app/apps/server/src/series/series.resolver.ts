@@ -2,7 +2,7 @@ import { Resolver, Query, Args } from '@nestjs/graphql';
 import { Series } from '@app/database';
 import { SeriesService } from './series.service';
 import { PaginationQuery, SeriesPaginatedData } from '../dto';
-import { PaginationDefaultPipe } from '../pagination.pipe';
+import { PaginationDefaultPipe } from '../pipe';
 
 @Resolver(() => Series)
 export class SeriesResolver {
