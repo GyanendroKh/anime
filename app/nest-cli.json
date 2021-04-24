@@ -52,6 +52,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/database/tsconfig.lib.json"
       }
+    },
+    "scrapper": {
+      "type": "library",
+      "root": "libs/scrapper",
+      "entryFile": "index",
+      "sourceRoot": "libs/scrapper/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/scrapper/tsconfig.lib.json"
+      }
     }
   }
 }

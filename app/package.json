@@ -101,7 +101,9 @@
       "@anime/data/(.*)": "<rootDir>/libs/data/src/$1",
       "@anime/data": "<rootDir>/libs/data/src",
       "@app/database/(.*)": "<rootDir>/libs/database/src/$1",
-      "@app/database": "<rootDir>/libs/database/src"
+      "@app/database": "<rootDir>/libs/database/src",
+      "@app/scrapper/(.*)": "<rootDir>/libs/scrapper/src/$1",
+      "@app/scrapper": "<rootDir>/libs/scrapper/src"
     }
   },
   "lint-staged": {
