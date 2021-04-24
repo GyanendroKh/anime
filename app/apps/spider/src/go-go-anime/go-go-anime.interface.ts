@@ -3,8 +3,6 @@ export interface INameLinkRet {
   link: string;
 }
 
-export type INameLinkIdRet = INameLinkRet & { id: string };
-
 export interface IAnimeListRet {
   pageNo: number;
   list: INameLinkRet[];
@@ -32,29 +30,4 @@ export interface IAnimeInfoRet {
 export interface IAnimeEpisodeRet<T = INameLinkRet> {
   movieId: string;
   episodes: T[];
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IAnimeVideLink extends INameLinkRet {}
-
-export type IEventTypes = 'runner' | 'list' | 'info' | 'episodes';
-
-export type IEventActions =
-  | 'add'
-  | 'add-multiple'
-  | 'start'
-  | 'finish'
-  | 'running';
-
-export interface IEvent<T = any, K = any> {
-  type: IEventTypes;
-  action: IEventActions;
-  data: T;
-  extra: K;
-}
-
-export interface IEpisodeRunner {
-  movieId: string;
-  start: number;
-  end: number;
 }
