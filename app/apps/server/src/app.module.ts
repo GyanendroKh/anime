@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { SeriesModule } from './series/series.module';
 import { EpisodeModule } from './episode/episode.module';
 import { GenreModule } from './genre/genre.module';
+import { RedisModule } from 'nestjs-redis';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { GenreModule } from './genre/genre.module';
       playground: true,
       autoSchemaFile: true
     }),
+    RedisModule.register({}),
     SeriesModule,
     EpisodeModule,
     GenreModule
