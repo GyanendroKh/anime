@@ -6,12 +6,12 @@ import {
 } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Genre, GoGoAnimeSeries, Series } from '@app/database/entity';
+import { GoGoAnimeScrapperModule } from '@app/scrapper';
 import { BullModule, InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { router, setQueues, BullAdapter } from 'bull-board';
 import { GoGoAnimeConsumer } from './go-go-anime.consumer';
 import { GoGoAnimeListener } from './go-go-anime.listener';
-import { GoGoAnimeService } from './go-go-anime.service';
 
 @Module({
   imports: [
@@ -19,9 +19,10 @@ import { GoGoAnimeService } from './go-go-anime.service';
     TypeOrmModule.forFeature([Series, Genre, GoGoAnimeSeries]),
     BullModule.registerQueue({
       name: 'gogoanime'
-    })
+    }),
+    GoGoAnimeScrapperModule
   ],
-  providers: [GoGoAnimeConsumer, GoGoAnimeListener, GoGoAnimeService]
+  providers: [GoGoAnimeConsumer, GoGoAnimeListener]
 })
 export class GoGoAnimeModule implements NestModule {
   constructor(

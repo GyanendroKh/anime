@@ -1,15 +1,15 @@
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { Episode, EpisodeRepo } from '@app/database';
+import { GoGoAnimeScrapper } from '@app/scrapper';
 import { Cache } from 'cache-manager';
 import { IPaginatedData, IPaginatedQuery } from '../types';
-import { GoGoAnimeService } from '../../../spider/src/go-go-anime/go-go-anime.service';
 import { DEFAULT_PAGINATION } from '../dto';
 
 @Injectable()
 export class EpisodeService {
   constructor(
     public readonly repo: EpisodeRepo,
-    private readonly spiderService: GoGoAnimeService,
+    private readonly scrapper: GoGoAnimeScrapper,
     @Inject(CACHE_MANAGER)
     private readonly cacheManager: Cache
   ) {}
@@ -35,8 +35,8 @@ export class EpisodeService {
     }
 
     if (!video.videoId) {
-      const videoId = await this.spiderService.getAnimeEpisodeId(
-        `${this.spiderService.baseUrl}${video.link}`
+      const videoId = await this.scrapper.getAnimeEpisodeId(
+        `${this.scrapper.baseUrl}${video.link}`
       );
       video.videoId = videoId;
       video.save();
@@ -50,7 +50,7 @@ export class EpisodeService {
         return JSON.parse(cacheValue);
       }
 
-      const res = await this.spiderService.getAnimeVideoLinks(video.videoId);
+      const res = await this.scrapper.getAnimeVideoLinks(video.videoId);
 
       await this.cacheManager.set(cacheKey, JSON.stringify(res), {
         ttl: 100000

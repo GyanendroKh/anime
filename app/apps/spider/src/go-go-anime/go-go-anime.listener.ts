@@ -1,10 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import {
-  IAnimeEpisodeRet,
-  IAnimeInfoRet,
-  IAnimeListRet
-} from './go-go-anime.interface';
+import { IAnimeEpisodeRet, IAnimeInfoRet, IAnimeListRet } from '@app/scrapper';
 
 @Injectable()
 export class GoGoAnimeListener {

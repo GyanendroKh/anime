@@ -1,3 +1,4 @@
+import { GoGoAnimeScrapper } from '@app/scrapper';
 import {
   Process,
   Processor,
@@ -6,12 +7,11 @@ import {
 } from '@nestjs/bull';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Job } from 'bull';
-import { GoGoAnimeService } from './go-go-anime.service';
 
 @Processor('gogoanime')
 export class GoGoAnimeConsumer {
   constructor(
-    private readonly service: GoGoAnimeService,
+    private readonly scrapper: GoGoAnimeScrapper,
     private readonly eventEmitter: EventEmitter2
   ) {}
 
@@ -31,21 +31,21 @@ export class GoGoAnimeConsumer {
 
   @Process('list')
   async getList(job: Job<number>) {
-    const res = await this.service.getAnimeList(job.data);
+    const res = await this.scrapper.getAnimeList(job.data);
 
     return res;
   }
 
   @Process('info')
   async getInfo(job: Job<string>) {
-    const res = await this.service.getAnimeInfo(job.data);
+    const res = await this.scrapper.getAnimeInfo(job.data);
 
     return res;
   }
 
   @Process('episodes')
   async getEpisodes(job: Job<{ link: string; count: number }>) {
-    const res = await this.service.getAnimeEpisodes(
+    const res = await this.scrapper.getAnimeEpisodes(
       job.data.link,
       0,
       job.data.count
