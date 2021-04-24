@@ -2,8 +2,13 @@ import { useQuery } from '@apollo/client';
 import React, { FC, useState } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
-import { ActivityIndicator, Searchbar, Title } from 'react-native-paper';
-import { SeriesItem } from '../components';
+import {
+  ActivityIndicator,
+  Paragraph,
+  Searchbar,
+  Title
+} from 'react-native-paper';
+import { Center, SeriesItem } from '../components';
 import { SearchSeriesType, SEARCH_SERIES } from '../graphql/series';
 import { ExploreNavProps, HomeNavProps } from '../navigators';
 import styles2 from '../styles';
@@ -20,7 +25,7 @@ type SearchProps = {
 
 const Search: FC<SearchProps> = ({ goBack, onPress }) => {
   const [search, setSearch] = useState('');
-  const { data, loading, fetchMore } = useQuery<SearchSeriesType>(
+  const { data, loading, error, fetchMore } = useQuery<SearchSeriesType>(
     SEARCH_SERIES,
     {
       variables: {
@@ -51,7 +56,18 @@ const Search: FC<SearchProps> = ({ goBack, onPress }) => {
           }
         />
       </View>
-      {series.length === 0 && (
+      {loading && (
+        <Center flex={true}>
+          <ActivityIndicator size={25} />
+        </Center>
+      )}
+      {error && (
+        <Center flex={true}>
+          <Title>Error!</Title>
+          <Paragraph>{error.message}</Paragraph>
+        </Center>
+      )}
+      {series.length === 0 && !loading && (
         <View style={[styles2.center, styles2.flex1]}>
           <Title style={styles2.center}>Search for something.</Title>
         </View>

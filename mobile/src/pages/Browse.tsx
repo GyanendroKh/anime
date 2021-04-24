@@ -2,10 +2,17 @@ import { useQuery } from '@apollo/client';
 import { BannerAd, BannerAdSize } from '@react-native-firebase/admob';
 import React, { FC } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { ActivityIndicator, Appbar, List, Surface } from 'react-native-paper';
+import {
+  ActivityIndicator,
+  Appbar,
+  List,
+  Paragraph,
+  Surface,
+  Title
+} from 'react-native-paper';
 import Animated from 'react-native-reanimated';
 import Ads from '../Ads';
-import { Margin } from '../components';
+import { Center, Margin } from '../components';
 import { APPBAR_HEIGHT } from '../constants';
 import { GetGenresType, GET_GENRES } from '../graphql/genre';
 import { useCollapsibleAppbar } from '../hooks';
@@ -16,7 +23,7 @@ export const Browse: FC<ExploreNavProps<'Browse'>> = ({ navigation }) => {
   const { scrollHandler, appBarStyle, contentStyle } = useCollapsibleAppbar({
     appBarHeight: APPBAR_HEIGHT
   });
-  const { data, loading } = useQuery<GetGenresType>(GET_GENRES);
+  const { data, loading, error } = useQuery<GetGenresType>(GET_GENRES);
 
   return (
     <View style={styles.flex1}>
@@ -33,6 +40,12 @@ export const Browse: FC<ExploreNavProps<'Browse'>> = ({ navigation }) => {
       </Animated.View>
       <Animated.ScrollView style={contentStyle} onScroll={scrollHandler}>
         <View style={styles2.content}>
+          {error && (
+            <Center flex={true}>
+              <Title>Error!</Title>
+              <Paragraph>{error.message}</Paragraph>
+            </Center>
+          )}
           <Surface style={styles2.section}>
             <List.Accordion
               title="Genres"

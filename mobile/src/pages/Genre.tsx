@@ -1,8 +1,13 @@
 import React, { FC } from 'react';
 import { Dimensions, FlatList, StyleSheet, View } from 'react-native';
-import { ActivityIndicator, Appbar } from 'react-native-paper';
+import {
+  ActivityIndicator,
+  Appbar,
+  Paragraph,
+  Title
+} from 'react-native-paper';
 import { useQuery } from '@apollo/client';
-import { SeriesItem } from '../components';
+import { Center, SeriesItem } from '../components';
 import { GetSeriesByGenreType, GET_SERIES_BY_GENRE } from '../graphql/series';
 import { ExploreNavProps } from '../navigators';
 import styles from '../styles';
@@ -18,7 +23,7 @@ export const Genre: FC<ExploreNavProps<'Genres'>> = ({
   },
   navigation
 }) => {
-  const { data, loading, fetchMore } = useQuery<GetSeriesByGenreType>(
+  const { data, loading, error, fetchMore } = useQuery<GetSeriesByGenreType>(
     GET_SERIES_BY_GENRE,
     {
       variables: {
@@ -38,6 +43,17 @@ export const Genre: FC<ExploreNavProps<'Genres'>> = ({
         <Appbar.BackAction onPress={() => navigation.pop()} />
         <Appbar.Content title={genre.name} />
       </Appbar.Header>
+      {loading && (
+        <Center flex={true}>
+          <ActivityIndicator size={25} />
+        </Center>
+      )}
+      {error && (
+        <Center flex={true}>
+          <Title>Error!</Title>
+          <Paragraph>{error.message}</Paragraph>
+        </Center>
+      )}
       {data && (
         <FlatList
           data={(data?.seriesListByGenre.data ?? []) as ISeriesBasic[]}

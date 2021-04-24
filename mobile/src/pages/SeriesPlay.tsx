@@ -11,6 +11,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import {
   ActivityIndicator,
   List,
+  Paragraph,
   Surface,
   Text,
   Title
@@ -53,7 +54,7 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({
 
   const [selectEpisode, setSelectedEpisode] = useState(episodeIndex);
 
-  const { data, loading } = useQuery<GetVideoType>(GET_VIDEO, {
+  const { data, loading, error } = useQuery<GetVideoType>(GET_VIDEO, {
     variables: {
       uuid: anime.episodes[selectEpisode].uuid
     }
@@ -86,7 +87,13 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({
         ]}
       >
         {loading && <ActivityIndicator size={25} />}
-        {!loading && (
+        {error && (
+          <>
+            <Title>Error!</Title>
+            <Paragraph>{error.message}</Paragraph>
+          </>
+        )}
+        {!loading && !error && (
           <Video
             style={[styles.fill]}
             resizeMode="contain"

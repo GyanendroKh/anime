@@ -1,7 +1,13 @@
 import { useQuery } from '@apollo/client';
 import { BannerAd, BannerAdSize } from '@react-native-firebase/admob';
 import React, { FC, useState } from 'react';
-import { View, Image, Dimensions, StyleSheet } from 'react-native';
+import {
+  View,
+  Image,
+  Dimensions,
+  StyleSheet,
+  ActivityIndicator
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {
   IconButton,
@@ -14,6 +20,7 @@ import {
 } from 'react-native-paper';
 import Animated from 'react-native-reanimated';
 import Ads from '../Ads';
+import { Center } from '../components';
 import { theme } from '../constants';
 import { GetSeriesInfoType, GET_SERIES_INFO } from '../graphql/series';
 import { ExploreNavProps, HomeNavProps } from '../navigators';
@@ -41,14 +48,28 @@ export const Series: FC<SeriesProps> = ({
   const [selectedContentHeader, setSelectedContentHeader] = useState<
     'info' | 'episodes'
   >('info');
-  const { data } = useQuery<GetSeriesInfoType>(GET_SERIES_INFO, {
-    variables: {
-      uuid: series.uuid
+  const { data, loading, error } = useQuery<GetSeriesInfoType>(
+    GET_SERIES_INFO,
+    {
+      variables: {
+        uuid: series.uuid
+      }
     }
-  });
+  );
 
   return (
     <>
+      {loading && (
+        <Center flex={true}>
+          <ActivityIndicator size={25} />
+        </Center>
+      )}
+      {error && (
+        <Center flex={true}>
+          <Title>Error!</Title>
+          <Paragraph>{error.message}</Paragraph>
+        </Center>
+      )}
       <View style={styles2.imageWrapper}>
         <Image
           source={{ uri: series.thumbnail }}
