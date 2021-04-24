@@ -9,6 +9,14 @@ export class SeriesResolver {
   constructor(private readonly service: SeriesService) {}
 
   @Query(() => SeriesPaginatedData)
+  async topAnimes(
+    @Args('query', { nullable: true }, PaginationDefaultPipe)
+    query: PaginationQuery
+  ): Promise<SeriesPaginatedData> {
+    return await this.service.getTopAnimes(query);
+  }
+
+  @Query(() => SeriesPaginatedData)
   async seriesList(
     @Args('query', { nullable: true }, PaginationDefaultPipe)
     query: PaginationQuery

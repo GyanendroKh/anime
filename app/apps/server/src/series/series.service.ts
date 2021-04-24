@@ -1,12 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { Series, SeriesRepo } from '@app/database';
+import { RedisService } from 'nestjs-redis';
 import { IPaginatedData, IPaginatedQuery } from '../types';
-import { Raw } from 'typeorm';
+import { In, Raw } from 'typeorm';
 import { DEFAULT_PAGINATION } from '../dto';
+import IORedis from 'ioredis';
 
 @Injectable()
 export class SeriesService {
-  constructor(public readonly repo: SeriesRepo) {}
+  private readonly redisClient: IORedis.Redis;
+  constructor(
+    public readonly repo: SeriesRepo,
+    private readonly redis: RedisService
+  ) {
+    this.redisClient = redis.getClient();
+  }
 
   async list(
     query: IPaginatedQuery = DEFAULT_PAGINATION
@@ -60,6 +68,36 @@ export class SeriesService {
       offset,
       count,
       data
+    };
+  }
+
+  async getTopAnimes(query: IPaginatedQuery): Promise<IPaginatedData<Series>> {
+    const key = ['anime', 'list', 'top'].join(':');
+    const length = await this.redisClient.llen(key);
+
+    const res = (
+      await this.redis
+        .getClient()
+        .lrange(key, query.offset, query.offset + query.limit)
+    ).filter(d => d.trim() !== '');
+
+    const data = await (() => {
+      if (res.length === 0) {
+        return Promise.resolve<Series[]>([]);
+      }
+
+      return this.repo.repo.find({
+        where: {
+          uuid: In(res)
+        },
+        relations: ['genres', 'episodes']
+      });
+    })();
+
+    return {
+      ...query,
+      count: length,
+      data: data
     };
   }
 }
