@@ -4,7 +4,6 @@ import {
   IAnimeEpisodeRet,
   IAnimeInfoRet,
   IAnimeListRet,
-  IAnimeVideLink,
   INameLinkRet
 } from './go-go-anime.interface';
 
@@ -16,16 +15,200 @@ export class GoGoAnimeService {
     this.baseUrl = 'https://gogoanime.ai';
   }
 
+  async getGenres(): Promise<string[]> {
+    const res = await this.httpService.get(this.baseUrl).toPromise();
+    const $ = cheerioLoad(res.data);
+
+    const genres = new Array<string>();
+
+    $('nav.menu_series.genre ul li').each((_, ele) => {
+      const a = $(ele).children('a');
+
+      genres.push(a.attr('title'));
+    });
+
+    return genres;
+  }
+
+  async getRecentRelease(pageNo: number): Promise<IAnimeListRet> {
+    const url = new URL(
+      'https://ajax.gogo-load.com/ajax/page-recent-release.html'
+    );
+    url.searchParams.set('page', String(pageNo));
+
+    const res = await this.httpService.get(url.toString()).toPromise();
+    const $ = cheerioLoad(res.data);
+
+    const paginations = new Array<number>();
+    const series = new Array<INameLinkRet>();
+
+    $(
+      'div.anime_name_pagination.intro div.pagination.recent ul.pagination-list li'
+    ).each((_, ele) => {
+      const a = $(ele).children('a');
+
+      const number = a.data('page');
+
+      paginations.push(number);
+    });
+
+    $('div.last_episodes.loaddub ul.items li').each((_, ele) => {
+      const a = $(ele).find('p.name a');
+
+      const link = a.attr('href');
+      const name = a.attr('title');
+
+      series.push({ link, name });
+    });
+
+    return {
+      list: series,
+      pageNo,
+      paginations
+    };
+  }
+
+  async getPopular(pageNo: number): Promise<IAnimeListRet> {
+    const url = new URL(
+      'https://ajax.gogo-load.com/ajax/page-recent-release-ongoing.html'
+    );
+    url.searchParams.set('page', String(pageNo));
+
+    const res = await this.httpService.get(url.toString()).toPromise();
+    const $ = cheerioLoad(res.data);
+
+    const paginations = new Array<number>();
+    const series = new Array<INameLinkRet>();
+
+    $(
+      'div.anime_name_pagination div.pagination.popular ul.pagination-list li'
+    ).each((_, ele) => {
+      const a = $(ele).children('a');
+
+      paginations.push(Number(a.data('page')));
+    });
+
+    $('div.added_series_body.popular ul li').each((_, ele) => {
+      const a = $(ele).children('a');
+
+      const link = a.attr('href');
+      const name = a.attr('title');
+
+      series.push({ link, name });
+    });
+
+    return {
+      pageNo,
+      list: series,
+      paginations
+    };
+  }
+
+  async getRecentlyAdded(): Promise<Array<INameLinkRet>> {
+    const res = await this.httpService.get(this.baseUrl).toPromise();
+    const $ = cheerioLoad(res.data);
+
+    const series = new Array<INameLinkRet>();
+
+    $('div.added_series_body.final ul.listing li').each((_, ele) => {
+      const a = $(ele).children('a');
+
+      const link = a.attr('href');
+      const name = a.attr('title');
+
+      series.push({ link, name });
+    });
+
+    return series;
+  }
+
+  async getNewSeasons(pageNo: number): Promise<IAnimeListRet> {
+    const url = new URL('/new-season.html', this.baseUrl);
+    url.searchParams.set('page', String(pageNo));
+
+    const res = await this.httpService.get(url.toString()).toPromise();
+    const $ = cheerioLoad(res.data);
+
+    const paginations = new Array<number>();
+    const series = new Array<INameLinkRet>();
+
+    $('div.anime_name_pagination div.pagination ul.pagination-list li').each(
+      (_, ele) => {
+        const a = $(ele).children('a');
+
+        const number = a.data('page');
+
+        paginations.push(number);
+      }
+    );
+
+    $('div.last_episodes ul.items li').each((_, ele) => {
+      const a = $(ele).find('p.name a');
+
+      const link = a.attr('href');
+      const name = a.attr('title');
+
+      series.push({ link, name });
+    });
+
+    return {
+      pageNo,
+      list: series,
+      paginations
+    };
+  }
+
+  async getMovieList(pageNo: number): Promise<IAnimeListRet> {
+    const url = new URL('/anime-movies.html', this.baseUrl);
+    url.searchParams.set('page', String(pageNo));
+
+    const res = await this.httpService.get(url.toString()).toPromise();
+    const $ = cheerioLoad(res.data);
+
+    const series = new Array<INameLinkRet>();
+    const paginations = new Array<number>();
+
+    $('div.anime_name_pagination div.pagination ul.pagination-list li').each(
+      (_, ele) => {
+        const a = $(ele).children('a');
+
+        const page = a.data('page');
+
+        paginations.push(page);
+      }
+    );
+
+    $('div.last_episodes ul.items li').each((_, ele) => {
+      const a = $(ele).find('p.name a');
+      const link = a.attr('href');
+      const name = a.attr('title');
+
+      series.push({ link, name });
+    });
+
+    return {
+      list: series,
+      pageNo,
+      paginations
+    };
+  }
+
   async getAnimeList(pageNo: number): Promise<IAnimeListRet> {
     const url = new URL('/anime-list.html', this.baseUrl);
     url.searchParams.set('page', String(pageNo));
 
     const res = await this.httpService.get(url.toString()).toPromise();
-    const html = res.data;
+    const $ = cheerioLoad(res.data);
 
-    const $ = cheerioLoad(html);
+    const paginations = new Array<number>();
+    const list = new Array<INameLinkRet>();
 
-    const list: IAnimeListRet['list'] = [];
+    $('.pagination ul.pagination-list li').each((_, ele) => {
+      const e = $(ele).children('a');
+
+      const dataPage = e.attr('data-page');
+      paginations.push(Number(dataPage));
+    });
 
     $('.anime_list_body ul li').each((_, ele) => {
       const e = $(ele).children('a');
@@ -34,15 +217,6 @@ export class GoGoAnimeService {
       const href = e.attr('href');
 
       list.push({ name: title, link: href });
-    });
-
-    const paginations: number[] = [];
-
-    $('.pagination ul.pagination-list li').each((_, ele) => {
-      const e = $(ele).children('a');
-
-      const dataPage = e.attr('data-page');
-      paginations.push(Number(dataPage));
     });
 
     return {
@@ -56,9 +230,7 @@ export class GoGoAnimeService {
     const url = new URL(link, this.baseUrl);
 
     const res = await this.httpService.get(url.toString()).toPromise();
-    const html = res.data;
-
-    const $ = cheerioLoad(html);
+    const $ = cheerioLoad(res.data);
 
     const animeInfoBody = $('.anime_info_body');
     const animeInfoBodyBg = animeInfoBody.children('.anime_info_body_bg');
@@ -157,9 +329,7 @@ export class GoGoAnimeService {
     url.searchParams.set('ep_end', end + '');
 
     const res = await this.httpService.get(url.toString()).toPromise();
-    const html = res.data;
-
-    const $ = cheerioLoad(html);
+    const $ = cheerioLoad(res.data);
 
     const episodes: INameLinkRet[] = [];
 
@@ -180,9 +350,7 @@ export class GoGoAnimeService {
 
   async getAnimeEpisodeId(link: string): Promise<string> {
     const res = await this.httpService.get(link).toPromise();
-    const html = res.data;
-
-    const $ = cheerioLoad(html);
+    const $ = cheerioLoad(res.data);
 
     const src = $('.play-video iframe').attr('src');
 
@@ -195,7 +363,7 @@ export class GoGoAnimeService {
     return matches.groups['id'];
   }
 
-  async getAnimeVideoLinks(videoId: string): Promise<IAnimeVideLink[]> {
+  async getAnimeVideoLinks(videoId: string): Promise<INameLinkRet[]> {
     const url = new URL('https://gogo-play.net/ajax.php');
     url.searchParams.set('id', videoId);
 
