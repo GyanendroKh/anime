@@ -16,13 +16,15 @@ import {
   Title
 } from 'react-native-paper';
 import Video from 'react-native-video-controls';
+import Orientation from 'react-native-orientation-locker';
+import { BannerAd, BannerAdSize } from '@react-native-firebase/admob';
 import { theme } from '../constants';
 import { GetVideoType, GET_VIDEO } from '../graphql/series';
 import Icon from '../Icon';
 import { ExploreNavProps, HomeNavProps } from '../navigators';
 import styles from '../styles';
 import { ISeries } from '../types';
-import Orientation from 'react-native-orientation-locker';
+import Ads from '../Ads';
 
 export type SeriesPlayProps = {
   anime: ISeries;
@@ -139,6 +141,16 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({
               </View>
             </View>
           </Surface>
+          <View style={styles.height10} />
+          <BannerAd
+            unitId={Ads.BANNER_ID}
+            size={BannerAdSize.ADAPTIVE_BANNER}
+            onAdLoaded={() => {}}
+            onAdOpened={() => {}}
+            onAdClosed={() => {}}
+            onAdFailedToLoad={() => {}}
+            onAdLeftApplication={() => {}}
+          />
           <View style={styles.height10} />
           <ScrollView>
             <Surface style={styles2.episodesSection}>

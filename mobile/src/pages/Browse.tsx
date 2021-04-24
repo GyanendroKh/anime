@@ -1,8 +1,11 @@
 import { useQuery } from '@apollo/client';
+import { BannerAd, BannerAdSize } from '@react-native-firebase/admob';
 import React, { FC } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Appbar, List, Surface } from 'react-native-paper';
 import Animated from 'react-native-reanimated';
+import Ads from '../Ads';
+import { Margin } from '../components';
 import { APPBAR_HEIGHT } from '../constants';
 import { GetGenresType, GET_GENRES } from '../graphql/genre';
 import { useCollapsibleAppbar } from '../hooks';
@@ -52,6 +55,17 @@ export const Browse: FC<ExploreNavProps<'Browse'>> = ({ navigation }) => {
               })}
             </List.Accordion>
           </Surface>
+          <Margin marginVertical={5}>
+            <BannerAd
+              unitId={Ads.BANNER_ID}
+              size={BannerAdSize.ADAPTIVE_BANNER}
+              onAdLoaded={() => {}}
+              onAdOpened={() => {}}
+              onAdClosed={() => {}}
+              onAdFailedToLoad={() => {}}
+              onAdLeftApplication={() => {}}
+            />
+          </Margin>
         </View>
       </Animated.ScrollView>
     </View>

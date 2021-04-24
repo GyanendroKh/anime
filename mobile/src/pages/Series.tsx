@@ -1,4 +1,5 @@
 import { useQuery } from '@apollo/client';
+import { BannerAd, BannerAdSize } from '@react-native-firebase/admob';
 import React, { FC, useState } from 'react';
 import { View, Image, Dimensions, StyleSheet } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
@@ -12,6 +13,7 @@ import {
   TouchableRipple
 } from 'react-native-paper';
 import Animated from 'react-native-reanimated';
+import Ads from '../Ads';
 import { theme } from '../constants';
 import { GetSeriesInfoType, GET_SERIES_INFO } from '../graphql/series';
 import { ExploreNavProps, HomeNavProps } from '../navigators';
@@ -80,71 +82,82 @@ export const Series: FC<SeriesProps> = ({
             <Title>{series.title}</Title>
             <Subheading>Released: {data?.series?.released}</Subheading>
           </LinearGradient>
-          <Surface style={[styles2.contentDetails, styles.flexGrow1]}>
-            <View style={styles2.contentDetailsHeader}>
-              <TouchableRipple
-                style={[
-                  styles2.contentDetailsHeaderItem,
+          <>
+            <Surface style={[styles2.contentDetails, styles.flexGrow1]}>
+              <View style={styles2.contentDetailsHeader}>
+                <TouchableRipple
+                  style={[
+                    styles2.contentDetailsHeaderItem,
+                    selectedContentHeader === 'info'
+                      ? styles2.contentDetailsHeaderItemActive
+                      : {}
+                  ]}
+                  onPress={() => {
+                    setSelectedContentHeader('info');
+                  }}
+                >
+                  <Title>Info</Title>
+                </TouchableRipple>
+                <TouchableRipple
+                  style={[
+                    styles2.contentDetailsHeaderItem,
+                    selectedContentHeader === 'episodes'
+                      ? styles2.contentDetailsHeaderItemActive
+                      : {}
+                  ]}
+                  onPress={() => {
+                    setSelectedContentHeader('episodes');
+                  }}
+                >
+                  <Title>Episodes</Title>
+                </TouchableRipple>
+              </View>
+              <View
+                style={
                   selectedContentHeader === 'info'
-                    ? styles2.contentDetailsHeaderItemActive
-                    : {}
-                ]}
-                onPress={() => {
-                  setSelectedContentHeader('info');
-                }}
+                    ? styles.displayFlex
+                    : styles.displayNone
+                }
               >
-                <Title>Info</Title>
-              </TouchableRipple>
-              <TouchableRipple
-                style={[
-                  styles2.contentDetailsHeaderItem,
+                <Paragraph>{data?.series.summary}</Paragraph>
+              </View>
+              <View
+                style={
                   selectedContentHeader === 'episodes'
-                    ? styles2.contentDetailsHeaderItemActive
-                    : {}
-                ]}
-                onPress={() => {
-                  setSelectedContentHeader('episodes');
-                }}
+                    ? styles.displayFlex
+                    : styles.displayNone
+                }
               >
-                <Title>Episodes</Title>
-              </TouchableRipple>
-            </View>
-            <View
-              style={
-                selectedContentHeader === 'info'
-                  ? styles.displayFlex
-                  : styles.displayNone
-              }
-            >
-              <Paragraph>{data?.series.summary}</Paragraph>
-            </View>
-            <View
-              style={
-                selectedContentHeader === 'episodes'
-                  ? styles.displayFlex
-                  : styles.displayNone
-              }
-            >
-              {[...(data?.series.episodes ?? [])]
-                .sort((a, b) => a.number - b.number)
-                .map((episode, idx) => {
-                  return (
-                    <List.Item
-                      key={episode.uuid}
-                      title={episode.title}
-                      onPress={() => {
-                        if (onEpisodePress) {
-                          onEpisodePress({
-                            anime: data?.series,
-                            episodeIndex: idx
-                          });
-                        }
-                      }}
-                    />
-                  );
-                })}
-            </View>
-          </Surface>
+                {[...(data?.series.episodes ?? [])]
+                  .sort((a, b) => a.number - b.number)
+                  .map((episode, idx) => {
+                    return (
+                      <List.Item
+                        key={episode.uuid}
+                        title={episode.title}
+                        onPress={() => {
+                          if (onEpisodePress) {
+                            onEpisodePress({
+                              anime: data?.series,
+                              episodeIndex: idx
+                            });
+                          }
+                        }}
+                      />
+                    );
+                  })}
+              </View>
+            </Surface>
+            <BannerAd
+              unitId={Ads.BANNER_ID}
+              size={BannerAdSize.ADAPTIVE_BANNER}
+              onAdLoaded={() => {}}
+              onAdOpened={() => {}}
+              onAdClosed={() => {}}
+              onAdFailedToLoad={() => {}}
+              onAdLeftApplication={() => {}}
+            />
+          </>
         </View>
       </Animated.ScrollView>
     </>

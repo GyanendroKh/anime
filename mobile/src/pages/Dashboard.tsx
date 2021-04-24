@@ -1,15 +1,17 @@
 import React, { FC } from 'react';
 import { StyleSheet, View, FlatList } from 'react-native';
+import { useQuery } from '@apollo/client';
 import { Appbar, Title } from 'react-native-paper';
 import Animated from 'react-native-reanimated';
+import { BannerAd, BannerAdSize } from '@react-native-firebase/admob';
 import { useCollapsibleAppbar } from '../hooks';
 import styles from '../styles';
 import { HomeNavProps } from '../navigators';
 import { APPBAR_HEIGHT } from '../constants';
-import { SeriesItem } from '../components';
+import { Margin, SeriesItem } from '../components';
 import { ISeriesBasic } from '../types';
-import { useQuery } from '@apollo/client';
 import { DASHBOARD_ANIMES_TYPE, GET_DASHBOARD_ANIMES } from '../graphql/series';
+import Ads from '../Ads';
 
 const AnimeSection: FC<{
   title: string;
@@ -68,6 +70,17 @@ export const Dashboard: FC<HomeNavProps<'Dashboard'>> = ({ navigation }) => {
               });
             }}
           />
+          <Margin marginVertical={5}>
+            <BannerAd
+              unitId={Ads.BANNER_ID}
+              size={BannerAdSize.ADAPTIVE_BANNER}
+              onAdLoaded={() => {}}
+              onAdOpened={() => {}}
+              onAdClosed={() => {}}
+              onAdFailedToLoad={() => {}}
+              onAdLeftApplication={() => {}}
+            />
+          </Margin>
           <AnimeSection
             title="Trending Animes"
             animes={data.trendingAnimes.data}
@@ -77,6 +90,17 @@ export const Dashboard: FC<HomeNavProps<'Dashboard'>> = ({ navigation }) => {
               });
             }}
           />
+          <Margin marginVertical={5}>
+            <BannerAd
+              unitId={Ads.BANNER_ID}
+              size={BannerAdSize.ADAPTIVE_BANNER}
+              onAdLoaded={() => {}}
+              onAdOpened={() => {}}
+              onAdClosed={() => {}}
+              onAdFailedToLoad={() => {}}
+              onAdLeftApplication={() => {}}
+            />
+          </Margin>
           <AnimeSection
             title="My Collections"
             animes={data.myCollections.data}
