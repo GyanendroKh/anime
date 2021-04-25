@@ -1,7 +1,9 @@
+import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { IAnimeEpisodeRet, IAnimeInfoRet, IAnimeListRet } from '@app/scrapper';
 import { IEpisodeJob } from '../types';
 
+@Injectable()
 export class GoGoAnimeListener {
   @OnEvent('gogoanime.list.start', { async: true })
   async onListStart(pageNo: number) {

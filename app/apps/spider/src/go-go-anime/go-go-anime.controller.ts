@@ -7,6 +7,16 @@ export class GoGoAnimeController {
 
   @Get('/start')
   start() {
-    this.runner.startGenreRun();
+    this.runner.startRun();
+  }
+
+  @Get('/pause')
+  pause() {
+    this.runner.pause();
+  }
+
+  @Get('/clear')
+  clear() {
+    this.runner.clear();
   }
 }

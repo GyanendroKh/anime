@@ -1,13 +1,20 @@
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bull';
+import { RunnerAbstract } from '../runner.abstract';
 
 @Injectable()
-export class GoGoAnimeRunner {
+export class GoGoAnimeRunner extends RunnerAbstract {
   constructor(
     @InjectQueue('gogoanime')
-    private readonly queue: Queue
-  ) {}
+    queue: Queue
+  ) {
+    super(queue);
+  }
+
+  startRun() {
+    this.startGenreRun();
+  }
 
   startGenreRun() {
     this.queue.add('genre-run');
