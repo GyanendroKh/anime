@@ -12,6 +12,7 @@ import { GoGoAnimeConsumer } from './go-go-anime.consumer';
 import { GoGoAnimeListener } from './go-go-anime.listener';
 import { GoGoAnimeRunner } from './go-go-anime.runner';
 import { GoGoAnimeListenerRun } from './go-go-anime.listener.run';
+import { GoGoAnimeController } from './go-go-anime.controller';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { GoGoAnimeListenerRun } from './go-go-anime.listener.run';
     }),
     GoGoAnimeScrapperModule
   ],
+  controllers: [GoGoAnimeController],
   providers: [
     GoGoAnimeConsumer,
     GoGoAnimeListener,
