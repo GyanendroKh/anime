@@ -30,6 +30,11 @@ export class GoGoAnimeConsumer {
     );
   }
 
+  @Process('genre-run')
+  getGenres() {
+    return this.scrapper.getGenres();
+  }
+
   @Process('list')
   getList(job: Job<number>) {
     return this.scrapper.getAnimeList(job.data);

@@ -3,6 +3,16 @@ import { IAnimeListRet, IAnimeInfoRet, IAnimeEpisodeRet } from '@app/scrapper';
 import { IEpisodeJob } from '../types';
 
 export class GoGoAnimeListenerRun {
+  @OnEvent('gogoanime.genre-run.start', { async: true })
+  async onGenreStart() {
+    console.log('Genre Run Started');
+  }
+
+  @OnEvent('gogoanime.genre-run.finish', { async: true })
+  async onGenreCompleted(_: null, genres: string[]) {
+    console.log('Genre Run Completed', genres);
+  }
+
   @OnEvent('gogoanime.list-run.start', { async: true })
   async onListStart(pageNo: number) {
     console.log('List Run Started', pageNo);
