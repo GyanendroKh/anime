@@ -1,8 +1,7 @@
-import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { IAnimeEpisodeRet, IAnimeInfoRet, IAnimeListRet } from '@app/scrapper';
+import { IEpisodeJob } from '../types';
 
-@Injectable()
 export class GoGoAnimeListener {
   @OnEvent('gogoanime.list.start', { async: true })
   async onListStart(pageNo: number) {
@@ -25,15 +24,12 @@ export class GoGoAnimeListener {
   }
 
   @OnEvent('gogoanime.episode.start', { async: true })
-  async onEpisodeStart(args: { link: string; count: number }) {
+  async onEpisodeStart(args: IEpisodeJob) {
     console.log('Episode Start', args);
   }
 
   @OnEvent('gogoanime.episode.finish', { async: true })
-  async onEpisodeComplete(
-    args: { link: string; count: number },
-    data: IAnimeEpisodeRet
-  ) {
+  async onEpisodeComplete(args: IEpisodeJob, data: IAnimeEpisodeRet) {
     console.log('Episode finish', args, data);
   }
 }

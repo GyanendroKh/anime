@@ -7,6 +7,7 @@ import {
 } from '@nestjs/bull';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Job } from 'bull';
+import { IEpisodeJob } from '../types';
 
 @Processor('gogoanime')
 export class GoGoAnimeConsumer {
@@ -30,27 +31,32 @@ export class GoGoAnimeConsumer {
   }
 
   @Process('list')
-  async getList(job: Job<number>) {
-    const res = await this.scrapper.getAnimeList(job.data);
+  getList(job: Job<number>) {
+    return this.scrapper.getAnimeList(job.data);
+  }
 
-    return res;
+  @Process('list-run')
+  getListRun(job: Job<number>) {
+    return this.scrapper.getAnimeList(job.data);
   }
 
   @Process('info')
-  async getInfo(job: Job<string>) {
-    const res = await this.scrapper.getAnimeInfo(job.data);
+  getInfo(job: Job<string>) {
+    return this.scrapper.getAnimeInfo(job.data);
+  }
 
-    return res;
+  @Process('info-run')
+  getInfoRun(job: Job<string>) {
+    return this.scrapper.getAnimeInfo(job.data);
   }
 
   @Process('episodes')
-  async getEpisodes(job: Job<{ link: string; count: number }>) {
-    const res = await this.scrapper.getAnimeEpisodes(
-      job.data.link,
-      0,
-      job.data.count
-    );
+  getEpisodes(job: Job<IEpisodeJob>) {
+    return this.scrapper.getAnimeEpisodes(job.data.link, 0, job.data.count);
+  }
 
-    return res;
+  @Process('episodes-run')
+  getEpisodesRun(job: Job<IEpisodeJob>) {
+    return this.scrapper.getAnimeEpisodes(job.data.link, 0, job.data.count);
   }
 }

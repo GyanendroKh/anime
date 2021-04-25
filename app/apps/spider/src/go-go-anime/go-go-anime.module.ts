@@ -4,25 +4,29 @@ import {
   Module,
   NestModule
 } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Genre, GoGoAnimeSeries, Series } from '@app/database/entity';
 import { GoGoAnimeScrapperModule } from '@app/scrapper';
 import { BullModule, InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { router, setQueues, BullAdapter } from 'bull-board';
 import { GoGoAnimeConsumer } from './go-go-anime.consumer';
 import { GoGoAnimeListener } from './go-go-anime.listener';
+import { GoGoAnimeRunner } from './go-go-anime.runner';
+import { GoGoAnimeListenerRun } from './go-go-anime.listener.run';
 
 @Module({
   imports: [
     HttpModule,
-    TypeOrmModule.forFeature([Series, Genre, GoGoAnimeSeries]),
     BullModule.registerQueue({
       name: 'gogoanime'
     }),
     GoGoAnimeScrapperModule
   ],
-  providers: [GoGoAnimeConsumer, GoGoAnimeListener]
+  providers: [
+    GoGoAnimeConsumer,
+    GoGoAnimeListener,
+    GoGoAnimeListenerRun,
+    GoGoAnimeRunner
+  ]
 })
 export class GoGoAnimeModule implements NestModule {
   constructor(
