@@ -57,11 +57,11 @@ export class GoGoAnimeConsumer {
 
   @Process('episodes')
   getEpisodes(job: Job<IEpisodeJob>) {
-    return this.scrapper.getAnimeEpisodes(job.data.link, 0, job.data.count);
+    return this.scrapper.getAnimeEpisodes(job.data.movieId, 0, job.data.count);
   }
 
   @Process('episodes-run')
   getEpisodesRun(job: Job<IEpisodeJob>) {
-    return this.scrapper.getAnimeEpisodes(job.data.link, 0, job.data.count);
+    return this.scrapper.getAnimeEpisodes(job.data.movieId, 0, job.data.count);
   }
 }

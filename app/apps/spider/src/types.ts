@@ -1,4 +1,4 @@
 export interface IEpisodeJob {
-  link: string;
+  movieId: string;
   count: number;
 }

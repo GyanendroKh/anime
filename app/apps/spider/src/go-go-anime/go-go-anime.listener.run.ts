@@ -1,26 +1,31 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { IAnimeListRet, IAnimeInfoRet, IAnimeEpisodeRet } from '@app/scrapper';
-import { IEpisodeJob } from '../types';
+import { GoGoAnimeSeries, Series } from '@app/database';
 import { GoGoAnimeRunner } from './go-go-anime.runner';
 import { GoGoAnimeDatabase } from './go-go-anime.database';
-import { GoGoAnimeSeries, Series } from '@app/database';
+import { IEpisodeJob } from '../types';
 
 @Injectable()
 export class GoGoAnimeListenerRun {
+  private readonly logger: Logger;
+
   constructor(
     private readonly runner: GoGoAnimeRunner,
     private readonly database: GoGoAnimeDatabase
-  ) {}
+  ) {
+    this.logger = new Logger(GoGoAnimeListenerRun.name);
+  }
 
   @OnEvent('gogoanime.genre-run.start', { async: true })
   async onGenreStart() {
-    console.log('Genre Run Started');
+    this.logger.log('Genre Run Started.');
   }
 
   @OnEvent('gogoanime.genre-run.finish', { async: true })
   async onGenreCompleted(_: null, genres: string[]) {
-    console.log('Genre Run Completed', genres);
+    this.logger.log('Genre Run Finish.');
+
     this.database.addGenres(genres);
 
     this.runner.addListRun(1);
@@ -28,12 +33,12 @@ export class GoGoAnimeListenerRun {
 
   @OnEvent('gogoanime.list-run.start', { async: true })
   async onListStart(pageNo: number) {
-    console.log('List Run Started', pageNo);
+    this.logger.log(`List Run Start ${pageNo}`);
   }
 
   @OnEvent('gogoanime.list-run.finish', { async: true })
   async onListCompleted(pageNo: number, data: IAnimeListRet) {
-    console.log('List Run finish', pageNo, data.pageNo);
+    this.logger.log(`List Run Finish ${pageNo} ${data.list.length}`);
 
     const next = pageNo + 1;
 
@@ -43,7 +48,7 @@ export class GoGoAnimeListenerRun {
       });
 
       if (isCompleted) {
-        console.log('Skipping Info', link);
+        this.runner.skipInfoRun(link);
       } else {
         this.runner.addInfoRun(link);
       }
@@ -54,20 +59,27 @@ export class GoGoAnimeListenerRun {
     }
   }
 
+  @OnEvent('gogoanime.info-run.skip', { async: true })
+  async onInfoSkip(link: string) {
+    this.logger.log(`Info Skip ${link}`);
+  }
+
   @OnEvent('gogoanime.info-run.start', { async: true })
   async onInfoStart(link: string) {
-    console.log('Info Run Start', link);
+    this.logger.log(`Info Run Start ${link}`);
   }
 
   @OnEvent('gogoanime.info-run.finish', { async: true })
   async onInfoCompleted(link: string, data: IAnimeInfoRet) {
-    console.log('Info Run finish', link);
+    this.logger.log(`Info Run Finish ${link} ${data.movieId}`);
+
     let series = await this.database.getSeries(['movieId', data.movieId]);
 
     if (series) {
       if (data.status && series.status !== data.status) {
         series.status = data.status;
       }
+
       await series.save();
     } else {
       const genres = await this.database.getGenres(data.genres);
@@ -94,14 +106,19 @@ export class GoGoAnimeListenerRun {
     this.runner.addEpisodesRun(data.movieId, data.episodeCount);
   }
 
+  @OnEvent('gogoanime.episodes-run.skip', { async: true })
+  async onEpisodesSkip(movieId: string) {
+    this.logger.log(`Episodes Run Skip ${movieId}`);
+  }
+
   @OnEvent('gogoanime.episodes-run.start', { async: true })
-  async onEpisodeStart(args: IEpisodeJob) {
-    console.log('Episode Run Start', args);
+  async onEpisodesStart({ movieId }: IEpisodeJob) {
+    this.logger.log(`Episodes Run Start ${movieId}`);
   }
 
   @OnEvent('gogoanime.episodes-run.finish', { async: true })
-  async onEpisodeComplete(args: IEpisodeJob, data: IAnimeEpisodeRet) {
-    console.log('Episode Run finish', args.link, data.movieId);
+  async onEpisodesComplete({ movieId }: IEpisodeJob, data: IAnimeEpisodeRet) {
+    this.logger.log(`Episodes Run Finish ${movieId} ${data.episodes.length}`);
 
     await this.database.addEpisodes(data.movieId, data.episodes);
   }
