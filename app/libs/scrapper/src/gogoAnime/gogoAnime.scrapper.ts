@@ -278,7 +278,10 @@ export class GoGoAnimeScrapper {
       }
 
       if (type === 'genre') {
-        data.genres = text.split(', ');
+        data.genres = text
+          .split(', ')
+          .map(t => t.trim())
+          .filter(t => t !== '');
         return;
       }
 
@@ -293,7 +296,10 @@ export class GoGoAnimeScrapper {
       }
 
       if (type === 'other name') {
-        data.otherNames = text.split(', ');
+        data.otherNames = text
+          .split(', ')
+          .map(t => t.trim())
+          .filter(t => t !== '');
         return;
       }
     });
@@ -349,7 +355,9 @@ export class GoGoAnimeScrapper {
   }
 
   async getAnimeEpisodeId(link: string): Promise<string> {
-    const res = await this.httpService.get(link).toPromise();
+    const url = new URL(link, this.baseUrl);
+
+    const res = await this.httpService.get(url.toString()).toPromise();
     const $ = cheerioLoad(res.data);
 
     const src = $('.play-video iframe').attr('src');
