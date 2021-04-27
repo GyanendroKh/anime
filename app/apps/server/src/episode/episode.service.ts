@@ -35,9 +35,7 @@ export class EpisodeService {
     }
 
     if (!video.videoId) {
-      const videoId = await this.scrapper.getAnimeEpisodeId(
-        `${this.scrapper.baseUrl}${video.link}`
-      );
+      const videoId = await this.scrapper.getAnimeEpisodeId(video.link);
       video.videoId = videoId;
       video.save();
     }
