@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { IAnimeListRet, IAnimeInfoRet, IAnimeEpisodeRet } from '@app/scrapper';
-import { GoGoAnimeSeries, Series } from '@app/database';
 import { GoGoAnimeRunner } from './go-go-anime.runner';
 import { GoGoAnimeDatabase } from './go-go-anime.database';
 import { IEpisodeJob } from '../types';
@@ -26,7 +25,7 @@ export class GoGoAnimeListenerRun {
   async onGenreCompleted(_: null, genres: string[]) {
     this.logger.log('Genre Run Finish.');
 
-    this.database.addGenres(genres);
+    await this.database.addGenres(genres);
 
     this.runner.addListRun(1);
   }
@@ -73,7 +72,7 @@ export class GoGoAnimeListenerRun {
   async onInfoCompleted(link: string, data: IAnimeInfoRet) {
     this.logger.log(`Info Run Finish ${link} ${data.movieId}`);
 
-    let series = await this.database.getSeries(['movieId', data.movieId]);
+    const series = await this.database.getSeries(['movieId', data.movieId]);
 
     if (series) {
       if (data.status && series.status !== data.status) {
@@ -82,25 +81,7 @@ export class GoGoAnimeListenerRun {
 
       await series.save();
     } else {
-      const genres = await this.database.getGenres(data.genres);
-
-      series = Series.create({
-        title: data.title,
-        type: data.type,
-        thumbnail: data.image,
-        summary: data.summary,
-        released: data.released,
-        status: data.status,
-        genres: genres
-      });
-
-      const gogoAnime = GoGoAnimeSeries.create({
-        movieId: data.movieId,
-        link: data.link,
-        series: series
-      });
-
-      await gogoAnime.save();
+      await this.database.addSeries(data);
     }
 
     this.runner.addEpisodesRun(data.movieId, data.episodeCount);

@@ -7,7 +7,7 @@ import {
   GoGoAnimeSeries,
   Series
 } from '@app/database';
-import { INameLinkRet } from '@app/scrapper';
+import { IAnimeInfoRet, INameLinkRet } from '@app/scrapper';
 import { In, Repository } from 'typeorm';
 
 @Injectable()
@@ -50,7 +50,10 @@ export class GoGoAnimeDatabase {
       );
     }
 
-    return [...exist, ...addedGenres];
+    return {
+      exist,
+      added: addedGenres
+    };
   }
 
   async getSeries(
@@ -79,6 +82,30 @@ export class GoGoAnimeDatabase {
     query.setParameter('p', where[1]);
 
     return await query.getOne();
+  }
+
+  async addSeries(data: IAnimeInfoRet) {
+    const genres = await this.getGenres(data.genres);
+
+    const series = this.seriesRepo.create({
+      title: data.title,
+      type: data.type,
+      thumbnail: data.image,
+      summary: data.summary,
+      released: data.released,
+      status: data.status,
+      genres: genres
+    });
+
+    const gogoAnime = GoGoAnimeSeries.create({
+      movieId: data.movieId,
+      link: data.link,
+      series: series
+    });
+
+    await gogoAnime.save();
+
+    return [series, gogoAnime] as const;
   }
 
   getEpisodes(links: string[]) {
@@ -118,6 +145,9 @@ export class GoGoAnimeDatabase {
       episodesAdded.push(await gogoAnimeEpisode.save());
     }
 
-    return [...exist, ...episodesAdded];
+    return {
+      exist,
+      added: episodesAdded
+    };
   }
 }
