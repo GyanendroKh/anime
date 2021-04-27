@@ -371,6 +371,17 @@ export class GoGoAnimeScrapper {
     return matches.groups['id'];
   }
 
+  async getAnimeEpisodeSeries(link: string): Promise<IAnimeInfoRet> {
+    const url = new URL(link, this.baseUrl);
+
+    const res = await this.httpService.get(url.toString()).toPromise();
+    const $ = cheerioLoad(res.data);
+
+    const href = $('div.anime_video_body_cate div.anime-info a').attr('href');
+
+    return await this.getAnimeInfo(href);
+  }
+
   async getAnimeVideoLinks(videoId: string): Promise<INameLinkRet[]> {
     const url = new URL('https://gogo-play.net/ajax.php');
     url.searchParams.set('id', videoId);
