@@ -10,6 +10,11 @@ export class GoGoAnimeController {
     this.runner.startRun();
   }
 
+  @Get('/resume')
+  resume() {
+    this.runner.resume();
+  }
+
   @Get('/pause')
   pause() {
     this.runner.pause();

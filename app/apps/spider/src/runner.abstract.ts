@@ -7,6 +7,10 @@ export abstract class RunnerAbstract {
     return this.queue.pause();
   }
 
+  resume() {
+    return this.queue.resume();
+  }
+
   clear() {
     return this.queue.obliterate({ force: true });
   }
