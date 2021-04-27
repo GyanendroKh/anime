@@ -64,4 +64,9 @@ export class GoGoAnimeConsumer {
   getEpisodesRun(job: Job<IEpisodeJob>) {
     return this.scrapper.getAnimeEpisodes(job.data.movieId, 0, job.data.count);
   }
+
+  @Process('recent-release-run')
+  getRecentRelease(job: Job<number>) {
+    return this.scrapper.getRecentRelease(job.data);
+  }
 }

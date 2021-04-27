@@ -10,6 +10,11 @@ export class GoGoAnimeController {
     this.runner.startRun();
   }
 
+  @Get('/start/recent-release')
+  startRecentRelease() {
+    this.runner.startRecentRelease();
+  }
+
   @Get('/resume')
   resume() {
     this.runner.resume();

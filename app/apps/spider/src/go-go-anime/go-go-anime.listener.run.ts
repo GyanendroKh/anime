@@ -103,4 +103,14 @@ export class GoGoAnimeListenerRun {
 
     await this.database.addEpisodes(data.movieId, data.episodes);
   }
+
+  @OnEvent('gogoanime.recent-release-run.start', { async: true })
+  async onRecentReleaseStart(pageNo: number) {
+    this.logger.log(`Recent Release Start ${pageNo}`);
+  }
+
+  @OnEvent('gogoanime.recent-release-run.finish', { async: true })
+  async onRecentReleaseFinish(pageNo: number, data: IAnimeListRet) {
+    this.logger.log(`Recent Release Finish ${pageNo} ${data.list.length}`);
+  }
 }

@@ -18,8 +18,16 @@ export class GoGoAnimeRunner extends RunnerAbstract {
     this.startGenreRun();
   }
 
+  startRecentRelease() {
+    this.addRecentRelease(1);
+  }
+
   startGenreRun() {
     this.queue.add('genre-run');
+  }
+
+  addRecentRelease(pageNo: number) {
+    this.queue.add('recent-release-run', pageNo);
   }
 
   addList(pageNo: number) {
