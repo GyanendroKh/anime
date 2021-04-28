@@ -7,7 +7,7 @@ import {
 } from '@nestjs/bull';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Job } from 'bull';
-import { IEpisodeJob } from '../types';
+import { IEpisodeJob, IRecentReleaseJob } from '../types';
 
 @Processor('gogoanime')
 export class GoGoAnimeConsumer {
@@ -66,7 +66,7 @@ export class GoGoAnimeConsumer {
   }
 
   @Process('recent-release-run')
-  getRecentRelease(job: Job<number>) {
-    return this.scrapper.getRecentRelease(job.data);
+  getRecentRelease({ data: { pageNo } }: Job<IRecentReleaseJob>) {
+    return this.scrapper.getRecentRelease(pageNo);
   }
 }

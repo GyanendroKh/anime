@@ -84,6 +84,14 @@ export class GoGoAnimeDatabase {
     return await query.getOne();
   }
 
+  existSeries(movieIds: string[]) {
+    return this.gogoAnimeSeriesRepo.find({
+      where: {
+        movieId: In(movieIds)
+      }
+    });
+  }
+
   async addSeries(data: IAnimeInfoRet) {
     const genres = await this.getGenres(data.genres);
 

@@ -1,5 +1,6 @@
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
+import { IAnimeInfoRet } from '@app/scrapper';
 import { Queue } from 'bull';
 import { EventEmitter2 } from 'eventemitter2';
 import { RunnerAbstract } from '../runner.abstract';
@@ -26,8 +27,15 @@ export class GoGoAnimeRunner extends RunnerAbstract {
     this.queue.add('genre-run');
   }
 
-  addRecentRelease(pageNo: number) {
-    this.queue.add('recent-release-run', pageNo);
+  addRecentRelease(pageNo: number, extras: IAnimeInfoRet[] = []) {
+    this.queue.add('recent-release-run', {
+      pageNo,
+      extras
+    });
+  }
+
+  processRecentRelease(episodeJobs: IAnimeInfoRet[]) {
+    this.eventEmitter.emit('recent-release-process', episodeJobs);
   }
 
   addList(pageNo: number) {
@@ -48,6 +56,10 @@ export class GoGoAnimeRunner extends RunnerAbstract {
 
   addInfoRun(link: string) {
     this.queue.add('info-run', link);
+  }
+
+  emitInfoRunFinish(link: string, data: IAnimeInfoRet) {
+    this.eventEmitter.emit('gogoanime.info-run.finish', link, data);
   }
 
   addEpisodes(movieId: string, count: number) {
