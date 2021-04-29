@@ -8,20 +8,25 @@ import {
 } from '@app/scrapper';
 import { of } from 'rxjs';
 import { reduce, mergeMap, tap } from 'rxjs/operators';
+import { RedisService } from 'nestjs-redis';
+import { Redis } from 'ioredis';
 import { GoGoAnimeRunner } from './go-go-anime.runner';
 import { GoGoAnimeDatabase } from './go-go-anime.database';
 import { IEpisodeJob, IRecentReleaseJob } from '../types';
 
 @Injectable()
 export class GoGoAnimeListenerRun {
+  private readonly redisClient: Redis;
   private readonly logger: Logger;
 
   constructor(
     private readonly runner: GoGoAnimeRunner,
     private readonly database: GoGoAnimeDatabase,
-    private readonly scrapper: GoGoAnimeScrapper
+    private readonly scrapper: GoGoAnimeScrapper,
+    redis: RedisService
   ) {
     this.logger = new Logger(GoGoAnimeListenerRun.name);
+    this.redisClient = redis.getClient();
   }
 
   @OnEvent('gogoanime.genre-run.start', { async: true })
@@ -200,12 +205,36 @@ export class GoGoAnimeListenerRun {
   async animeShowcase(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _: null,
-    {}: {
+    {
+      popular,
+      onGoingPopular,
+      recentlyAdded
+    }: {
       popular: string[];
       onGoingPopular: string[];
       recentlyAdded: string[];
     }
   ) {
     this.logger.log('Anime Showcase Finish');
+
+    const getKey = (key: string) => {
+      return ['anime', 'list', key].join(':');
+    };
+
+    const popularKey = getKey('popular');
+    const onGoingPopularKey = getKey('ongoingpopular');
+    const recentlyAddedKey = getKey('recentlyadded');
+
+    popular.forEach(l => {
+      this.redisClient.lpush(popularKey, l);
+    });
+
+    onGoingPopular.forEach(l => {
+      this.redisClient.lpush(onGoingPopularKey, l);
+    });
+
+    recentlyAdded.forEach(l => {
+      this.redisClient.lpush(recentlyAddedKey, l);
+    });
   }
 }
