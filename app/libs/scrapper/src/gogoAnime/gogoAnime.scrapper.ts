@@ -68,7 +68,7 @@ export class GoGoAnimeScrapper {
     };
   }
 
-  async getPopular(pageNo: number): Promise<IAnimeListRet> {
+  async getOnGoingPopular(pageNo: number): Promise<IAnimeListRet> {
     const url = new URL(
       'https://ajax.gogo-load.com/ajax/page-recent-release-ongoing.html'
     );
@@ -100,6 +100,40 @@ export class GoGoAnimeScrapper {
     return {
       pageNo,
       list: series,
+      paginations
+    };
+  }
+
+  async getPopular(pageNo: number): Promise<IAnimeListRet> {
+    const url = new URL('/popular.html', this.baseUrl);
+    url.searchParams.set('page', String(pageNo));
+
+    const res = await this.httpService.get(url.toString()).toPromise();
+    const $ = cheerioLoad(res.data);
+
+    const paginations = new Array<number>();
+    const list = new Array<INameLinkRet>();
+
+    $(
+      'div.anime_name.anime_movies div.anime_name_pagination div.pagination ul.pagination-list li'
+    ).each((_, ele) => {
+      const a = $(ele).children('a');
+
+      paginations.push(Number(a.data('page')));
+    });
+
+    $('div.main_body div.last_episodes ul.items li').each((_, ele) => {
+      const a = $(ele).find('p.name a');
+
+      const name = a.attr('title');
+      const link = a.attr('href');
+
+      list.push({ name, link });
+    });
+
+    return {
+      pageNo,
+      list,
       paginations
     };
   }
