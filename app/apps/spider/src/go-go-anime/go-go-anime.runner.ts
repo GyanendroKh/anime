@@ -73,4 +73,8 @@ export class GoGoAnimeRunner extends RunnerAbstract {
   addEpisodesRun(movieId: string, count: number) {
     this.queue.add('episodes-run', { movieId, count });
   }
+
+  animeShowcaseRun() {
+    this.queue.add('anime-showcase');
+  }
 }

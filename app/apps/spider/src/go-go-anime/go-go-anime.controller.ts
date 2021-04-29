@@ -15,6 +15,11 @@ export class GoGoAnimeController {
     this.runner.startRecentRelease();
   }
 
+  @Get('/start/anime-showcase')
+  startAnimeShowcase() {
+    this.runner.animeShowcaseRun();
+  }
+
   @Get('/resume')
   resume() {
     this.runner.resume();

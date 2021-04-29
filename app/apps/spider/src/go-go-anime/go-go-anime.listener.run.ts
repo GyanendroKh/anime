@@ -190,4 +190,22 @@ export class GoGoAnimeListenerRun {
       )
       .toPromise();
   }
+
+  @OnEvent('gogoanime.anime-showcase.start', { async: true })
+  async onAnimeShowcaseStart() {
+    this.logger.log('Anime Showcase Start');
+  }
+
+  @OnEvent('gogoanime.anime-showcase.finish', { async: true })
+  async animeShowcase(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _: null,
+    {}: {
+      popular: string[];
+      onGoingPopular: string[];
+      recentlyAdded: string[];
+    }
+  ) {
+    this.logger.log('Anime Showcase Finish');
+  }
 }

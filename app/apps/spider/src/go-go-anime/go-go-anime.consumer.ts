@@ -69,4 +69,51 @@ export class GoGoAnimeConsumer {
   getRecentRelease({ data: { pageNo } }: Job<IRecentReleaseJob>) {
     return this.scrapper.getRecentRelease(pageNo);
   }
+
+  @Process('anime-showcase')
+  async getAnimeShowcase() {
+    const promises = [
+      (async () => {
+        const animes = new Array<string>();
+        const popularPages = 2;
+
+        for (let i = 0; i < popularPages; i++) {
+          const res = await this.scrapper.getPopular(i + 1);
+
+          res.list.forEach(a => animes.push(a.link));
+
+          if (!res.paginations.includes(i + 1 + 1)) {
+            break;
+          }
+        }
+
+        return animes;
+      })(),
+      (async () => {
+        const animes = new Array<string>();
+        const pages = 2;
+
+        for (let i = 0; i < pages; i++) {
+          const res = await this.scrapper.getOnGoingPopular(i + 1);
+
+          res.list.forEach(a => animes.push(a.link));
+
+          if (!res.paginations.includes(i + 1 + 1)) {
+            break;
+          }
+        }
+
+        return animes;
+      })(),
+      this.scrapper.getRecentlyAdded()
+    ] as const;
+
+    const [popular, ongoing, recent] = await Promise.all(promises);
+
+    return {
+      popular,
+      onGoingPopular: ongoing,
+      recentlyAdded: recent.map(a => a.link)
+    };
+  }
 }
