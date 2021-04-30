@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client';
 import { BannerAd, BannerAdSize } from '@react-native-firebase/admob';
-import React, { FC, useState } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import {
   View,
   Image,
@@ -56,6 +56,12 @@ export const Series: FC<SeriesProps> = ({
       }
     }
   );
+
+  const episodes = useMemo(() => {
+    return [...(data?.series.episodes ?? [])].sort(
+      (a, b) => a.number - b.number
+    );
+  }, [data]);
 
   return (
     <>
@@ -149,24 +155,25 @@ export const Series: FC<SeriesProps> = ({
                     : styles.displayNone
                 }
               >
-                {[...(data?.series.episodes ?? [])]
-                  .sort((a, b) => a.number - b.number)
-                  .map((episode, idx) => {
-                    return (
-                      <List.Item
-                        key={episode.uuid}
-                        title={episode.title}
-                        onPress={() => {
-                          if (onEpisodePress) {
-                            onEpisodePress({
-                              anime: data?.series,
-                              episodeIndex: idx
-                            });
-                          }
-                        }}
-                      />
-                    );
-                  })}
+                {episodes.map((episode, idx) => {
+                  return (
+                    <List.Item
+                      key={episode.uuid}
+                      title={episode.title}
+                      onPress={() => {
+                        if (onEpisodePress) {
+                          onEpisodePress({
+                            anime: {
+                              ...data?.series,
+                              episodes
+                            },
+                            episodeIndex: idx
+                          });
+                        }
+                      }}
+                    />
+                  );
+                })}
               </View>
             </Surface>
             <BannerAd

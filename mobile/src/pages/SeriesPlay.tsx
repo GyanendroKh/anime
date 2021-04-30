@@ -140,7 +140,7 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({
                 <View style={styles.flexRow}>
                   <Text style={styles2.detailInfoTitle}>{anime.title} - </Text>
                   <Text style={styles2.detailInfoTitle}>
-                    {selectEpisode + 1}
+                    {anime.episodes[selectEpisode].number}
                   </Text>
                 </View>
                 <Text>{anime.episodes.length} Episodes</Text>
@@ -163,7 +163,7 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({
             <Surface style={styles2.episodesSection}>
               <Title>Episodes</Title>
               <List.Section>
-                {[...anime.episodes].reverse().map((a, idx) => {
+                {anime.episodes.map((a, idx) => {
                   const borderRadius = {
                     borderTopLeftRadius: idx === 0 ? 10 : 0,
                     borderTopRightRadius: idx === 0 ? 10 : 0,
