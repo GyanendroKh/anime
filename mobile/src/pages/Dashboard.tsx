@@ -80,8 +80,8 @@ export const Dashboard: FC<HomeNavProps<'Dashboard'>> = ({ navigation }) => {
       {data !== undefined && (
         <Animated.ScrollView style={contentStyle} onScroll={scrollHandler}>
           <AnimeSection
-            title="Top Animes"
-            animes={data.topAnimes.data}
+            title="Popular"
+            animes={data.animeShowcase.popular}
             onPress={anime => {
               navigation.navigate('Series', {
                 series: anime
@@ -100,8 +100,8 @@ export const Dashboard: FC<HomeNavProps<'Dashboard'>> = ({ navigation }) => {
             />
           </Margin>
           <AnimeSection
-            title="Trending Animes"
-            animes={data.trendingAnimes.data}
+            title="OnGoing Popular"
+            animes={data.animeShowcase.onGoingPopular}
             onPress={anime => {
               navigation.navigate('Series', {
                 series: anime
@@ -120,8 +120,8 @@ export const Dashboard: FC<HomeNavProps<'Dashboard'>> = ({ navigation }) => {
             />
           </Margin>
           <AnimeSection
-            title="My Collections"
-            animes={data.myCollections.data}
+            title="Recently Added"
+            animes={data.animeShowcase.recentlyAdded}
             onPress={anime => {
               navigation.navigate('Series', {
                 series: anime

@@ -2,38 +2,30 @@ import { gql } from '@apollo/client';
 import { IPaginatedData, ISeries, ISeriesBasic } from '../types';
 
 export type DASHBOARD_ANIMES_TYPE = {
-  topAnimes: {
-    data: ISeriesBasic[];
-  };
-  trendingAnimes: {
-    data: ISeriesBasic[];
-  };
-  myCollections: {
-    data: ISeriesBasic[];
+  animeShowcase: {
+    popular: ISeriesBasic[];
+    onGoingPopular: ISeriesBasic[];
+    recentlyAdded: ISeriesBasic[];
   };
 };
 
 export const GET_DASHBOARD_ANIMES = gql`
-  query TopAnimes {
-    topAnimes: seriesList(query: { offset: 1330, limit: 20 }) {
-      data {
-        uuid
-        thumbnail
+  query AnimeShowcase {
+    animeShowcase {
+      popular {
         title
+        thumbnail
+        uuid
       }
-    }
-    trendingAnimes: seriesList(query: { offset: 1430, limit: 20 }) {
-      data {
-        uuid
-        thumbnail
+      onGoingPopular {
         title
+        thumbnail
+        uuid
       }
-    }
-    myCollections: seriesList(query: { offset: 110, limit: 20 }) {
-      data {
-        uuid
-        thumbnail
+      recentlyAdded {
         title
+        thumbnail
+        uuid
       }
     }
   }
