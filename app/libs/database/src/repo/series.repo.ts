@@ -33,17 +33,16 @@ export class SeriesRepo {
   }
 
   async getSeriesByLink(links: Array<string>) {
-    const gogoAnimeQuery = this.gogoAnimeRepo
-      .createQueryBuilder('gs')
-      .select('gs.series')
-      .where('gs.link IN (:...links)');
-
-    const res = await this.repo
+    return await this.repo
       .createQueryBuilder('s')
-      .where(`s.id IN (${gogoAnimeQuery.getQuery()})`)
+      .leftJoinAndSelect(
+        `${this.gogoAnimeRepo.metadata.tableName}`,
+        'gs',
+        'gs.seriesId = s.id'
+      )
+      .where('gs.link IN (:...links)')
+      .orderBy('FIELD(gs.link, :...links)')
       .setParameter('links', links)
       .getMany();
-
-    return res;
   }
 }

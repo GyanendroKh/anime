@@ -226,15 +226,15 @@ export class GoGoAnimeListenerRun {
     const recentlyAddedKey = getKey('recentlyadded');
 
     popular.forEach(l => {
-      this.redisClient.lpush(popularKey, l);
+      this.redisClient.rpush(popularKey, l);
     });
 
     onGoingPopular.forEach(l => {
-      this.redisClient.lpush(onGoingPopularKey, l);
+      this.redisClient.rpush(onGoingPopularKey, l);
     });
 
     recentlyAdded.forEach(l => {
-      this.redisClient.lpush(recentlyAddedKey, l);
+      this.redisClient.rpush(recentlyAddedKey, l);
     });
   }
 }
