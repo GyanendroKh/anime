@@ -100,4 +100,39 @@ export class SeriesService {
       data: data
     };
   }
+
+  async getAnimeShowcase() {
+    const offset = 0;
+    const limit = 10;
+
+    const getKey = (key: string) => {
+      return ['anime', 'list', key].join(':');
+    };
+
+    const popularKey = getKey('popular');
+    const onGoingPopularKey = getKey('ongoingpopular');
+    const recentlyAddedKey = getKey('recentlyadded');
+
+    const [
+      popularLinks,
+      onGoingPopularLinks,
+      recentlyAddedLinks
+    ] = await Promise.all([
+      this.redisClient.lrange(popularKey, offset, offset + limit),
+      this.redisClient.lrange(onGoingPopularKey, offset, offset + limit),
+      this.redisClient.lrange(recentlyAddedKey, offset, offset + limit)
+    ]);
+
+    const [popular, onGoingPopular, recentlyAdded] = await Promise.all([
+      this.repo.getSeriesByLink(popularLinks),
+      this.repo.getSeriesByLink(onGoingPopularLinks),
+      this.repo.getSeriesByLink(recentlyAddedLinks)
+    ]);
+
+    return {
+      popular,
+      onGoingPopular,
+      recentlyAdded
+    };
+  }
 }

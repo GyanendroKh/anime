@@ -1,7 +1,11 @@
 import { Resolver, Query, Args } from '@nestjs/graphql';
 import { Series } from '@app/database';
 import { SeriesService } from './series.service';
-import { PaginationQuery, SeriesPaginatedData } from '../dto';
+import {
+  PaginationQuery,
+  SeriesPaginatedData,
+  SeriesAnimeShowcase
+} from '../dto';
 import { PaginationDefaultPipe } from '../pipe';
 
 @Resolver(() => Series)
@@ -14,6 +18,11 @@ export class SeriesResolver {
     query: PaginationQuery
   ): Promise<SeriesPaginatedData> {
     return await this.service.getTopAnimes(query);
+  }
+
+  @Query(() => SeriesAnimeShowcase)
+  async animeShowcase(): Promise<SeriesAnimeShowcase> {
+    return await this.service.getAnimeShowcase();
   }
 
   @Query(() => SeriesPaginatedData)
