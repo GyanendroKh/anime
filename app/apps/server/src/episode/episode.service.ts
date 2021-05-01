@@ -51,7 +51,7 @@ export class EpisodeService {
       const res = await this.scrapper.getAnimeVideoLinks(video.videoId);
 
       await this.cacheManager.set(cacheKey, JSON.stringify(res), {
-        ttl: 100000
+        ttl: 1800
       });
 
       return res;
