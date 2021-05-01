@@ -158,6 +158,7 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+            resValue "string", "CodePushDeploymentKey", '""'
         }
         release {
             // Caution! In production, you need to generate your own keystore file.
@@ -165,6 +166,7 @@ android {
             signingConfig signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            resValue "string", "CodePushDeploymentKey", '"jCHnqlyg1jQTt8jGmwQJ7QdPpT2pcNaopd8j9"'
         }
     }
 
@@ -230,4 +232,5 @@ project.ext.vectoricons = [
 
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")
+apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"
 applyNativeModulesAppBuildGradle(project)
