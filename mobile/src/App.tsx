@@ -1,10 +1,14 @@
 import 'react-native-gesture-handler';
-import React, { FC, useEffect } from 'react';
+import React, { FC, useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import codePush from 'react-native-code-push';
 import { Provider as PaperProvider } from 'react-native-paper';
-import { NavigationContainer } from '@react-navigation/native';
+import {
+  NavigationContainer,
+  NavigationContainerRef
+} from '@react-navigation/native';
 import Orientation from 'react-native-orientation-locker';
+import analytics from '@react-native-firebase/analytics';
 import { RootNavigator } from './navigators';
 import { theme } from './constants';
 import {
@@ -48,6 +52,9 @@ const apolloClient = new ApolloClient({
 });
 
 export const App: FC = codePush(() => {
+  const navigationRef = useRef<NavigationContainerRef>();
+  const routeNameRef = useRef<String>();
+
   useEffect(() => {
     Orientation.lockToPortrait();
   }, []);
@@ -55,7 +62,27 @@ export const App: FC = codePush(() => {
   return (
     <ApolloProvider client={apolloClient}>
       <PaperProvider theme={theme}>
-        <NavigationContainer theme={theme}>
+        <NavigationContainer
+          ref={ref => (navigationRef.current = ref ?? undefined)}
+          theme={theme}
+          onReady={() => {
+            routeNameRef.current = navigationRef.current?.getCurrentRoute()?.name;
+          }}
+          onStateChange={async () => {
+            const previousRouteName = routeNameRef.current;
+            const currentRouteName = navigationRef.current?.getCurrentRoute()
+              ?.name;
+
+            if (previousRouteName !== currentRouteName) {
+              await analytics().logScreenView({
+                screen_name: currentRouteName,
+                screen_class: currentRouteName
+              });
+            }
+
+            routeNameRef.current = currentRouteName;
+          }}
+        >
           <View style={styles.container}>
             <RootNavigator />
           </View>
