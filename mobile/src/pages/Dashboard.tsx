@@ -70,7 +70,10 @@ export const Dashboard: FC<HomeNavProps<'Dashboard'>> = ({ navigation }) => {
         {recentRelease && (
           <AnimeSection
             title="Recent Release"
-            animes={recentRelease.data}
+            animes={recentRelease.data.map(a => ({
+              ...a,
+              id: a.id.split('-episode')[0]
+            }))}
             onPress={series => {
               navigation.navigate('Series', { series });
             }}
