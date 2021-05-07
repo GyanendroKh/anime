@@ -1,4 +1,3 @@
-import { useQuery } from '@apollo/client';
 import { BannerAd, BannerAdSize } from '@react-native-firebase/admob';
 import React, { FC, useMemo, useState } from 'react';
 import {
@@ -8,6 +7,7 @@ import {
   StyleSheet,
   ActivityIndicator
 } from 'react-native';
+import { useQuery } from 'react-query';
 import LinearGradient from 'react-native-linear-gradient';
 import {
   IconButton,
@@ -19,13 +19,13 @@ import {
   TouchableRipple
 } from 'react-native-paper';
 import Animated from 'react-native-reanimated';
+import { IAnime, IEntity, IEntityBasic } from 'gogoanime-api';
 import Ads from '../Ads';
 import { Center } from '../components';
 import { theme } from '../constants';
-import { GetSeriesInfoType, GET_SERIES_INFO } from '../graphql/series';
+import { useGoGoAnime } from '../gogoAnime';
 import { ExploreNavProps, HomeNavProps } from '../navigators';
 import styles from '../styles';
-import { ISeriesBasic } from '../types';
 
 const { width } = Dimensions.get('screen');
 const imageWidth = width;
@@ -35,9 +35,13 @@ const contentMarginTop = imageHeight * 0.45;
 const contentPaddingBottom = 40;
 
 export type SeriesProps = {
-  series: ISeriesBasic;
+  series: IEntity;
   onBackBtnPress?: () => void;
-  onEpisodePress?: (data: { anime: any; episodeIndex: number }) => void;
+  onEpisodePress?: (data: {
+    anime: IAnime;
+    episodes: IEntityBasic[];
+    episodeIndex: number;
+  }) => void;
 };
 
 export const Series: FC<SeriesProps> = ({
@@ -45,23 +49,41 @@ export const Series: FC<SeriesProps> = ({
   onBackBtnPress,
   onEpisodePress
 }) => {
+  const gogoAnime = useGoGoAnime();
+
   const [selectedContentHeader, setSelectedContentHeader] = useState<
     'info' | 'episodes'
   >('info');
-  const { data, loading, error } = useQuery<GetSeriesInfoType>(
-    GET_SERIES_INFO,
+
+  const { data: anime, isLoading: loading, error } = useQuery(
+    'animeInfo',
+    async () => {
+      return await gogoAnime.animeInfo(series.id);
+    }
+  );
+
+  const { data: animeEpisodes } = useQuery(
+    ['animeEpisode', anime?.movieId],
+    async () => {
+      return await gogoAnime.animeEpisodes(
+        anime?.movieId ?? '',
+        0,
+        anime?.episodeCount ?? 0
+      );
+    },
     {
-      variables: {
-        uuid: series.uuid
-      }
+      enabled: !!anime
     }
   );
 
   const episodes = useMemo(() => {
-    return [...(data?.series.episodes ?? [])].sort(
-      (a, b) => a.number - b.number
-    );
-  }, [data]);
+    return animeEpisodes?.sort((a, b) => {
+      return (
+        Number(a.title.toLowerCase().replace('ep', '').trim()) -
+        Number(b.title.toLowerCase().replace('ep', '').trim())
+      );
+    });
+  }, [animeEpisodes]);
 
   return (
     <>
@@ -73,7 +95,7 @@ export const Series: FC<SeriesProps> = ({
       {error && (
         <Center flex={true}>
           <Title>Error!</Title>
-          <Paragraph>{error.message}</Paragraph>
+          <Paragraph>{String(error)}</Paragraph>
         </Center>
       )}
       <View style={styles2.imageWrapper}>
@@ -107,7 +129,7 @@ export const Series: FC<SeriesProps> = ({
             style={styles2.contentHeader}
           >
             <Title>{series.title}</Title>
-            <Subheading>Released: {data?.series?.released}</Subheading>
+            <Subheading>Released: {anime?.released}</Subheading>
           </LinearGradient>
           <>
             <Surface style={[styles2.contentDetails, styles.flexGrow1]}>
@@ -146,7 +168,7 @@ export const Series: FC<SeriesProps> = ({
                     : styles.displayNone
                 }
               >
-                <Paragraph>{data?.series.summary}</Paragraph>
+                <Paragraph>{anime?.summary}</Paragraph>
               </View>
               <View
                 style={
@@ -155,25 +177,25 @@ export const Series: FC<SeriesProps> = ({
                     : styles.displayNone
                 }
               >
-                {episodes.map((episode, idx) => {
-                  return (
-                    <List.Item
-                      key={episode.uuid}
-                      title={episode.title}
-                      onPress={() => {
-                        if (onEpisodePress) {
-                          onEpisodePress({
-                            anime: {
-                              ...data?.series,
-                              episodes
-                            },
-                            episodeIndex: idx
-                          });
-                        }
-                      }}
-                    />
-                  );
-                })}
+                {anime &&
+                  episodes &&
+                  episodes?.map((episode, idx) => {
+                    return (
+                      <List.Item
+                        key={episode.id}
+                        title={episode.title}
+                        onPress={() => {
+                          if (onEpisodePress) {
+                            onEpisodePress({
+                              anime: anime,
+                              episodes: episodes,
+                              episodeIndex: idx
+                            });
+                          }
+                        }}
+                      />
+                    );
+                  })}
               </View>
             </Surface>
             <BannerAd
@@ -201,8 +223,8 @@ export const HomeSeries: FC<HomeNavProps<'Series'>> = ({
   return (
     <Series
       series={series}
-      onEpisodePress={({ anime, episodeIndex }) => {
-        navigation.navigate('SeriesPlay', { anime, episodeIndex });
+      onEpisodePress={({ anime, episodes, episodeIndex }) => {
+        navigation.navigate('SeriesPlay', { anime, episodes, episodeIndex });
       }}
       onBackBtnPress={() => {
         if (navigation.canGoBack()) {
@@ -222,8 +244,8 @@ export const ExploreSeries: FC<ExploreNavProps<'Series'>> = ({
   return (
     <Series
       series={series}
-      onEpisodePress={({ anime, episodeIndex }) => {
-        navigation.navigate('SeriesPlay', { anime, episodeIndex });
+      onEpisodePress={({ anime, episodes, episodeIndex }) => {
+        navigation.navigate('SeriesPlay', { anime, episodes, episodeIndex });
       }}
       onBackBtnPress={() => {
         if (navigation.canGoBack()) {

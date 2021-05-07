@@ -1,17 +1,24 @@
-import React, { FC } from 'react';
-import { Dimensions, FlatList, StyleSheet, View } from 'react-native';
+import React, { FC, useState } from 'react';
+import {
+  Dimensions,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import {
   ActivityIndicator,
   Appbar,
   Paragraph,
+  Text,
   Title
 } from 'react-native-paper';
-import { useQuery } from '@apollo/client';
+import { useQuery } from 'react-query';
 import { Center, SeriesItem } from '../components';
-import { GetSeriesByGenreType, GET_SERIES_BY_GENRE } from '../graphql/series';
+import { theme } from '../constants';
+import { useGoGoAnime } from '../gogoAnime';
 import { ExploreNavProps } from '../navigators';
 import styles from '../styles';
-import { ISeriesBasic } from '../types';
 
 const { width } = Dimensions.get('screen');
 const imageWidth = width / 2 - 5 * 2;
@@ -23,17 +30,13 @@ export const Genre: FC<ExploreNavProps<'Genres'>> = ({
   },
   navigation
 }) => {
-  const { data, loading, error, fetchMore } = useQuery<GetSeriesByGenreType>(
-    GET_SERIES_BY_GENRE,
-    {
-      variables: {
-        genre: genre.uuid,
-        query: {
-          offset: 0,
-          limit: 20
-        }
-      },
-      notifyOnNetworkStatusChange: true
+  const gogoAnime = useGoGoAnime();
+
+  const [page, setPage] = useState(1);
+  const { data, error, isLoading: loading } = useQuery(
+    ['genreList', genre.id, page],
+    () => {
+      return gogoAnime.genreList(genre.id, page);
     }
   );
 
@@ -41,7 +44,7 @@ export const Genre: FC<ExploreNavProps<'Genres'>> = ({
     <View style={styles.flex1}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => navigation.pop()} />
-        <Appbar.Content title={genre.name} />
+        <Appbar.Content title={genre.title} />
       </Appbar.Header>
       {loading && (
         <Center flex={true}>
@@ -51,38 +54,13 @@ export const Genre: FC<ExploreNavProps<'Genres'>> = ({
       {error && (
         <Center flex={true}>
           <Title>Error!</Title>
-          <Paragraph>{error.message}</Paragraph>
+          <Paragraph>{String(error)}</Paragraph>
         </Center>
       )}
       {data && (
         <FlatList
-          data={(data?.seriesListByGenre.data ?? []) as ISeriesBasic[]}
-          keyExtractor={({ uuid }) => uuid}
-          onEndReached={async () => {
-            const hasNext =
-              data.seriesListByGenre.data.length < data.seriesListByGenre.count;
-
-            if (hasNext) {
-              const offset = data.seriesListByGenre.data.length;
-              const limit = Math.min(
-                data.seriesListByGenre.count -
-                  data.seriesListByGenre.data.length,
-                20
-              );
-
-              if (!loading) {
-                await fetchMore({
-                  variables: {
-                    query: {
-                      offset,
-                      limit
-                    }
-                  }
-                });
-              }
-            }
-          }}
-          onEndReachedThreshold={0.35}
+          data={data.data ?? []}
+          keyExtractor={({ id }) => id}
           refreshing={loading}
           numColumns={2}
           renderItem={({ item }) => {
@@ -101,11 +79,26 @@ export const Genre: FC<ExploreNavProps<'Genres'>> = ({
             );
           }}
           ListFooterComponent={
-            loading ? (
-              <View style={styles2.loadingIndicator}>
-                <ActivityIndicator size={25} />
-              </View>
-            ) : null
+            <View style={styles2.paginationWrapper}>
+              {data?.paginations.map(p => {
+                return (
+                  <>
+                    <TouchableOpacity
+                      key={p}
+                      onPress={() => {
+                        setPage(p);
+                      }}
+                      style={[
+                        styles2.paginationItem,
+                        p === page ? styles2.paginationItemActive : {}
+                      ]}
+                    >
+                      <Text>{p}</Text>
+                    </TouchableOpacity>
+                  </>
+                );
+              })}
+            </View>
           }
         />
       )}
@@ -123,5 +116,21 @@ const styles2 = StyleSheet.create({
   },
   loadingIndicator: {
     padding: 15
+  },
+  paginationWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    borderTopColor: theme.colors.backdrop,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    marginTop: 10,
+    paddingBottom: 5
+  },
+  paginationItem: {
+    paddingHorizontal: 35,
+    paddingVertical: 10
+  },
+  paginationItemActive: {
+    borderTopColor: theme.colors.primary,
+    borderTopWidth: 2
   }
 });

@@ -2,6 +2,7 @@ import {
   createStackNavigator,
   StackNavigationProp
 } from '@react-navigation/stack';
+import { IEntityBasic } from 'gogoanime-api';
 import React, { FC } from 'react';
 import {
   Browse,
@@ -10,14 +11,14 @@ import {
   ExploreSearch,
   ExploreSeriesPlay
 } from '../pages';
-import { IGenre, NavProps } from '../types';
+import { NavProps } from '../types';
 import { SearchParamList } from './SearchNavigator';
 import { SeriesParamList } from './SeriesNavigator';
 
 type ExploreParamList = {
   Browse: undefined;
   Genres: {
-    genre: IGenre;
+    genre: IEntityBasic;
   };
 } & SeriesParamList &
   SearchParamList;

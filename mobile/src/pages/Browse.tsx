@@ -1,4 +1,3 @@
-import { useQuery } from '@apollo/client';
 import { BannerAd, BannerAdSize } from '@react-native-firebase/admob';
 import React, { FC } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -10,20 +9,24 @@ import {
   Surface,
   Title
 } from 'react-native-paper';
+import { useQuery } from 'react-query';
 import Animated from 'react-native-reanimated';
 import Ads from '../Ads';
 import { Center, Margin } from '../components';
 import { APPBAR_HEIGHT } from '../constants';
-import { GetGenresType, GET_GENRES } from '../graphql/genre';
 import { useCollapsibleAppbar } from '../hooks';
 import { ExploreNavProps } from '../navigators';
 import styles from '../styles';
+import { useGoGoAnime } from '../gogoAnime';
 
 export const Browse: FC<ExploreNavProps<'Browse'>> = ({ navigation }) => {
+  const gogoAnime = useGoGoAnime();
   const { scrollHandler, appBarStyle, contentStyle } = useCollapsibleAppbar({
     appBarHeight: APPBAR_HEIGHT
   });
-  const { data, loading, error } = useQuery<GetGenresType>(GET_GENRES);
+  const { data, isLoading: loading, error } = useQuery('genres', () =>
+    gogoAnime.genres()
+  );
 
   return (
     <View style={styles.flex1}>
@@ -43,7 +46,7 @@ export const Browse: FC<ExploreNavProps<'Browse'>> = ({ navigation }) => {
           {error && (
             <Center flex={true}>
               <Title>Error!</Title>
-              <Paragraph>{error.message}</Paragraph>
+              <Paragraph>{String(error)}</Paragraph>
             </Center>
           )}
           <Surface style={styles2.section}>
@@ -53,11 +56,11 @@ export const Browse: FC<ExploreNavProps<'Browse'>> = ({ navigation }) => {
                 loading ? props => <ActivityIndicator {...props} /> : undefined
               }
             >
-              {data?.genreGetAll.map(g => {
+              {data?.map(g => {
                 return (
                   <List.Item
-                    key={g.uuid}
-                    title={g.name}
+                    key={g.id}
+                    title={g.title}
                     onPress={() => {
                       navigation.navigate('Genres', {
                         genre: g

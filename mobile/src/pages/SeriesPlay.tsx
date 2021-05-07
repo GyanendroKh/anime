@@ -1,4 +1,3 @@
-import { useQuery } from '@apollo/client';
 import React, { FC, useEffect, useState } from 'react';
 import {
   View,
@@ -16,19 +15,21 @@ import {
   Text,
   Title
 } from 'react-native-paper';
+import { useQuery } from 'react-query';
 import Video from 'react-native-video-controls';
 import Orientation from 'react-native-orientation-locker';
+import { IAnime, IEntityBasic } from 'gogoanime-api';
 import { BannerAd, BannerAdSize } from '@react-native-firebase/admob';
 import { theme } from '../constants';
-import { GetVideoType, GET_VIDEO } from '../graphql/series';
 import Icon from '../Icon';
 import { ExploreNavProps, HomeNavProps } from '../navigators';
 import styles from '../styles';
-import { ISeries } from '../types';
 import Ads from '../Ads';
+import { useGoGoAnime } from '../gogoAnime';
 
 export type SeriesPlayProps = {
-  anime: ISeries;
+  anime: IAnime;
+  episodes: IEntityBasic[];
   episodeIndex: number;
   onBack?: () => void;
 };
@@ -37,9 +38,11 @@ const { width: baseWidth } = Dimensions.get('window');
 
 export const SeriesPlay: FC<SeriesPlayProps> = ({
   anime,
+  episodes,
   episodeIndex,
   onBack
 }) => {
+  const gogoAnime = useGoGoAnime();
   const [isFullScreen, setFullScreen] = useState(() => {
     const orientation = Orientation.getInitialOrientation();
 
@@ -53,14 +56,17 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({
   });
 
   const [selectEpisode, setSelectedEpisode] = useState(episodeIndex);
+  const episodeId = episodes[selectEpisode].id;
 
-  const { data, loading, error } = useQuery<GetVideoType>(GET_VIDEO, {
-    variables: {
-      uuid: anime.episodes[selectEpisode].uuid
+  const { data, error, isLoading: loading } = useQuery(
+    ['animeEpisodeVideo', episodeId],
+    async () => {
+      const { videoId } = await gogoAnime.animeEpisodeInfo(episodeId);
+      return await gogoAnime.animeEpisodeVideo(videoId);
     }
-  });
+  );
 
-  const videoLink = data?.episodeVideo.links[0].link;
+  const videoLink = data?.source[0].file;
 
   useEffect(() => {
     if (isFullScreen) {
@@ -90,7 +96,7 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({
         {error && (
           <>
             <Title>Error!</Title>
-            <Paragraph>{error.message}</Paragraph>
+            <Paragraph>{String(error)}</Paragraph>
           </>
         )}
         {!loading && !error && (
@@ -140,11 +146,10 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({
                 <View style={styles.flexRow}>
                   <Text style={styles2.detailInfoTitle}>{anime.title} - </Text>
                   <Text style={styles2.detailInfoTitle}>
-                    {anime.episodes[selectEpisode].number}
+                    {episodes[selectEpisode].title}
                   </Text>
                 </View>
-                <Text>{anime.episodes.length} Episodes</Text>
-                <Text>{anime.status}</Text>
+                <Text>{episodes.length} Episodes</Text>
               </View>
             </View>
           </Surface>
@@ -163,19 +168,19 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({
             <Surface style={styles2.episodesSection}>
               <Title>Episodes</Title>
               <List.Section>
-                {anime.episodes.map((a, idx) => {
+                {episodes.map((a, idx) => {
                   const borderRadius = {
                     borderTopLeftRadius: idx === 0 ? 10 : 0,
                     borderTopRightRadius: idx === 0 ? 10 : 0,
                     borderBottomLeftRadius:
-                      idx === anime.episodes.length - 1 ? 10 : 0,
+                      idx === episodes.length - 1 ? 10 : 0,
                     borderBottomRightRadius:
-                      idx === anime.episodes.length - 1 ? 10 : 0
+                      idx === episodes.length - 1 ? 10 : 0
                   };
 
                   return (
                     <List.Item
-                      key={a.uuid}
+                      key={a.id}
                       title={a.title}
                       style={[
                         styles2.episodes,

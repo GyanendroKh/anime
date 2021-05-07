@@ -1,18 +1,19 @@
-import { useQuery } from '@apollo/client';
 import React, { FC, useState } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
-import { FlatList } from 'react-native-gesture-handler';
+import { Dimensions, StyleSheet, View, FlatList } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import {
   ActivityIndicator,
   Paragraph,
   Searchbar,
+  Text,
   Title
 } from 'react-native-paper';
+import { useQuery } from 'react-query';
 import { Center, SeriesItem } from '../components';
-import { SearchSeriesType, SEARCH_SERIES } from '../graphql/series';
+import { theme } from '../constants';
+import { useGoGoAnime } from '../gogoAnime';
 import { ExploreNavProps, HomeNavProps } from '../navigators';
 import styles2 from '../styles';
-import { ISeriesBasic } from '../types';
 
 const { width } = Dimensions.get('screen');
 const imageWidth = width / 2 - 5 * 2;
@@ -20,27 +21,23 @@ const imageHeight = imageWidth * 1.35;
 
 type SearchProps = {
   goBack?: () => void;
-  onPress?: (series: ISeriesBasic) => void;
+  onPress?: (series: any) => void;
 };
 
 const Search: FC<SearchProps> = ({ goBack, onPress }) => {
+  const gogoAnime = useGoGoAnime();
   const [search, setSearch] = useState('');
-  const { data, loading, error, fetchMore } = useQuery<SearchSeriesType>(
-    SEARCH_SERIES,
+  const [page, setPage] = useState(1);
+
+  const { data: series, isLoading: loading, error } = useQuery(
+    ['search', search, page],
+    async () => {
+      return await gogoAnime.search(search, page);
+    },
     {
-      variables: {
-        query: search,
-        option: {
-          limit: 20,
-          offset: 0
-        }
-      },
-      notifyOnNetworkStatusChange: true
+      enabled: search !== ''
     }
   );
-
-  const series = search.trim() === '' ? [] : data?.seriesSearch.data ?? [];
-  const { count } = { count: data?.seriesSearch.count ?? 0 };
 
   return (
     <View style={styles2.flex1}>
@@ -56,74 +53,72 @@ const Search: FC<SearchProps> = ({ goBack, onPress }) => {
           }
         />
       </View>
-      {loading && (
-        <Center flex={true}>
-          <ActivityIndicator size={25} />
-        </Center>
-      )}
       {error && (
         <Center flex={true}>
           <Title>Error!</Title>
-          <Paragraph>{error.message}</Paragraph>
+          <Paragraph>{String(error)}</Paragraph>
         </Center>
       )}
-      {series.length === 0 && !loading && (
-        <View style={[styles2.center, styles2.flex1]}>
-          <Title style={styles2.center}>Search for something.</Title>
-        </View>
-      )}
-      {series.length !== 0 && (
-        <FlatList
-          contentContainerStyle={styles2.flexGrow1}
-          data={series}
-          keyExtractor={({ uuid }) => uuid}
-          numColumns={2}
-          onEndReachedThreshold={0.35}
-          onEndReached={async () => {
-            const hasNext = series.length < count;
-
-            if (hasNext) {
-              const offset = series.length;
-              const limit = Math.min(count - series.length, 20);
-
-              if (!loading) {
-                await fetchMore({
-                  variables: {
-                    option: {
-                      offset,
-                      limit
-                    }
-                  }
-                });
-              }
-            }
-          }}
-          renderItem={({ item }) => {
-            return (
-              <SeriesItem
-                series={item}
-                style={styles.itemStyle}
-                image={{
-                  height: imageHeight,
-                  width: imageWidth
-                }}
-                onPress={() => {
-                  if (onPress) {
-                    onPress(item);
-                  }
-                }}
-              />
-            );
-          }}
-          ListFooterComponent={
-            loading ? (
-              <View style={styles.loadingIndicator}>
-                <ActivityIndicator size={25} />
+      <FlatList
+        contentContainerStyle={styles2.flexGrow1}
+        data={series?.data ?? []}
+        keyExtractor={({ id }) => id}
+        numColumns={2}
+        renderItem={({ item }) => {
+          return (
+            <SeriesItem
+              series={item}
+              style={styles.itemStyle}
+              image={{
+                height: imageHeight,
+                width: imageWidth
+              }}
+              onPress={() => {
+                if (onPress) {
+                  onPress(item);
+                }
+              }}
+            />
+          );
+        }}
+        ListEmptyComponent={
+          <>
+            {!loading && (
+              <View style={[styles2.center, styles2.flex1]}>
+                <Title style={styles2.center}>Search for something.</Title>
               </View>
-            ) : null
-          }
-        />
-      )}
+            )}
+          </>
+        }
+        ListFooterComponent={
+          <>
+            {series?.data.length !== 0 && (
+              <>
+                <View style={styles.paginationWrapper}>
+                  {series?.paginations.map(p => {
+                    return (
+                      <>
+                        <TouchableOpacity
+                          key={p}
+                          onPress={() => {
+                            setPage(p);
+                          }}
+                          style={[
+                            styles.paginationItem,
+                            p === page ? styles.paginationItemActive : {}
+                          ]}
+                        >
+                          <Text>{p}</Text>
+                        </TouchableOpacity>
+                      </>
+                    );
+                  })}
+                </View>
+              </>
+            )}
+          </>
+        }
+      />
     </View>
   );
 };
@@ -169,5 +164,21 @@ const styles = StyleSheet.create({
   },
   loadingIndicator: {
     padding: 15
+  },
+  paginationWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    borderTopColor: theme.colors.backdrop,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    marginTop: 10,
+    paddingBottom: 5
+  },
+  paginationItem: {
+    paddingHorizontal: 35,
+    paddingVertical: 10
+  },
+  paginationItemActive: {
+    borderTopColor: theme.colors.primary,
+    borderTopWidth: 2
   }
 });

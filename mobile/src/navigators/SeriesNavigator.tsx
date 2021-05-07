@@ -1,9 +1,9 @@
+import { IEntity } from 'gogoanime-api';
 import { SeriesPlayProps } from '../pages';
-import { ISeriesBasic } from '../types';
 
 export type SeriesParamList = {
   Series: {
-    series: ISeriesBasic;
+    series: IEntity;
   };
   SeriesPlay: SeriesPlayProps;
 };

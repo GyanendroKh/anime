@@ -1,6 +1,7 @@
 import 'react-native-gesture-handler';
+import 'react-native-url-polyfill/auto';
 import React, { FC, useEffect, useRef } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, LogBox } from 'react-native';
 import codePush from 'react-native-code-push';
 import { Provider as PaperProvider } from 'react-native-paper';
 import {
@@ -9,47 +10,13 @@ import {
 } from '@react-navigation/native';
 import Orientation from 'react-native-orientation-locker';
 import analytics from '@react-native-firebase/analytics';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { RootNavigator } from './navigators';
 import { theme } from './constants';
-import {
-  ApolloClient,
-  ApolloProvider,
-  FieldPolicy,
-  InMemoryCache
-} from '@apollo/client';
-import { IPaginatedData } from './types';
 
-const paginationMerge = (
-  keyArgs: FieldPolicy<any>['keyArgs'] = false
-): FieldPolicy<IPaginatedData<any>> => {
-  return {
-    keyArgs,
-    merge(existing, incoming) {
-      if (existing) {
-        return {
-          ...incoming,
-          data: [...existing.data, ...incoming.data]
-        };
-      }
+const queryClient = new QueryClient();
 
-      return incoming;
-    }
-  };
-};
-
-const apolloClient = new ApolloClient({
-  uri: 'http://192.168.29.106:3000/graphql',
-  cache: new InMemoryCache({
-    typePolicies: {
-      Query: {
-        fields: {
-          seriesListByGenre: paginationMerge(['genre']),
-          seriesSearch: paginationMerge(['query'])
-        }
-      }
-    }
-  })
-});
+LogBox.ignoreLogs(['Setting a timer']);
 
 export const App: FC = codePush(() => {
   const navigationRef = useRef<NavigationContainerRef>();
@@ -60,7 +27,7 @@ export const App: FC = codePush(() => {
   }, []);
 
   return (
-    <ApolloProvider client={apolloClient}>
+    <QueryClientProvider client={queryClient}>
       <PaperProvider theme={theme}>
         <NavigationContainer
           ref={ref => (navigationRef.current = ref ?? undefined)}
@@ -88,7 +55,7 @@ export const App: FC = codePush(() => {
           </View>
         </NavigationContainer>
       </PaperProvider>
-    </ApolloProvider>
+    </QueryClientProvider>
   );
 });
 

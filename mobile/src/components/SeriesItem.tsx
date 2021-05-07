@@ -2,10 +2,10 @@ import React, { FC, memo } from 'react';
 import { Image, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Subheading, Surface } from 'react-native-paper';
-import { ISeriesBasic } from '../types';
+import { IEntity } from 'gogoanime-api';
 
 export type SeriesItemProps = {
-  series: ISeriesBasic;
+  series: IEntity;
   style?: StyleProp<ViewStyle>;
   onPress?: () => void;
   image?: {
