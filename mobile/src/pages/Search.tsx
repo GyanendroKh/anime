@@ -96,20 +96,18 @@ const Search: FC<SearchProps> = ({ goBack, onPress }) => {
                 <View style={styles2.paginationWrapper}>
                   {series?.paginations.map(p => {
                     return (
-                      <>
-                        <TouchableOpacity
-                          key={p}
-                          onPress={() => {
-                            setPage(p);
-                          }}
-                          style={[
-                            styles2.paginationItem,
-                            p === page ? styles2.paginationItemActive : {}
-                          ]}
-                        >
-                          <Text>{p}</Text>
-                        </TouchableOpacity>
-                      </>
+                      <TouchableOpacity
+                        key={p}
+                        onPress={() => {
+                          setPage(p);
+                        }}
+                        style={[
+                          styles2.paginationItem,
+                          p === page ? styles2.paginationItemActive : {}
+                        ]}
+                      >
+                        <Text>{p}</Text>
+                      </TouchableOpacity>
                     );
                   })}
                 </View>

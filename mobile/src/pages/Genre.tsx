@@ -81,20 +81,18 @@ export const Genre: FC<ExploreNavProps<'Genres'>> = ({
             <View style={styles.paginationWrapper}>
               {data?.paginations.map(p => {
                 return (
-                  <>
-                    <TouchableOpacity
-                      key={p}
-                      onPress={() => {
-                        setPage(p);
-                      }}
-                      style={[
-                        styles.paginationItem,
-                        p === page ? styles.paginationItemActive : {}
-                      ]}
-                    >
-                      <Text>{p}</Text>
-                    </TouchableOpacity>
-                  </>
+                  <TouchableOpacity
+                    key={p}
+                    onPress={() => {
+                      setPage(p);
+                    }}
+                    style={[
+                      styles.paginationItem,
+                      p === page ? styles.paginationItemActive : {}
+                    ]}
+                  >
+                    <Text>{p}</Text>
+                  </TouchableOpacity>
                 );
               })}
             </View>
