@@ -1,4 +1,3 @@
-import { BannerAd, BannerAdSize } from '@react-native-firebase/admob';
 import React, { FC, useState } from 'react';
 import {
   Dimensions,
@@ -15,8 +14,7 @@ import {
   Title
 } from 'react-native-paper';
 import { useQuery } from 'react-query';
-import Ads from '../Ads';
-import { Center, Margin, SeriesItem } from '../components';
+import { Center, SeriesItem } from '../components';
 import { useGoGoAnime } from '../gogoAnime';
 import { ExploreNavProps } from '../navigators';
 import styles from '../styles';
@@ -81,17 +79,6 @@ export const Genre: FC<ExploreNavProps<'Genres'>> = ({
           }}
           ListFooterComponent={
             <>
-              <Margin marginVertical={5}>
-                <BannerAd
-                  unitId={Ads.BANNER_ID}
-                  size={BannerAdSize.ADAPTIVE_BANNER}
-                  onAdLoaded={() => {}}
-                  onAdOpened={() => {}}
-                  onAdClosed={() => {}}
-                  onAdFailedToLoad={() => {}}
-                  onAdLeftApplication={() => {}}
-                />
-              </Margin>
               <View style={styles.paginationWrapper}>
                 {data?.paginations.map(p => {
                   return (

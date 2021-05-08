@@ -19,12 +19,10 @@ import { useQuery } from 'react-query';
 import Video from 'react-native-video-controls';
 import Orientation from 'react-native-orientation-locker';
 import { IAnime, IEntityBasic } from 'gogoanime-api';
-import { BannerAd, BannerAdSize } from '@react-native-firebase/admob';
 import { theme } from '../constants';
 import Icon from '../Icon';
 import { ExploreNavProps, HomeNavProps } from '../navigators';
 import styles from '../styles';
-import Ads from '../Ads';
 import { useGoGoAnime } from '../gogoAnime';
 
 export type SeriesPlayProps = {
@@ -153,16 +151,6 @@ export const SeriesPlay: FC<SeriesPlayProps> = ({
               </View>
             </View>
           </Surface>
-          <View style={styles.height10} />
-          <BannerAd
-            unitId={Ads.BANNER_ID}
-            size={BannerAdSize.ADAPTIVE_BANNER}
-            onAdLoaded={() => {}}
-            onAdOpened={() => {}}
-            onAdClosed={() => {}}
-            onAdFailedToLoad={() => {}}
-            onAdLeftApplication={() => {}}
-          />
           <View style={styles.height10} />
           <ScrollView>
             <Surface style={styles2.episodesSection}>

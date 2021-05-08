@@ -1,4 +1,3 @@
-import { BannerAd, BannerAdSize } from '@react-native-firebase/admob';
 import React, { FC } from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
@@ -11,8 +10,7 @@ import {
 } from 'react-native-paper';
 import { useQuery } from 'react-query';
 import Animated from 'react-native-reanimated';
-import Ads from '../Ads';
-import { Center, Margin } from '../components';
+import { Center } from '../components';
 import { APPBAR_HEIGHT } from '../constants';
 import { useCollapsibleAppbar } from '../hooks';
 import { ExploreNavProps } from '../navigators';
@@ -71,17 +69,6 @@ export const Browse: FC<ExploreNavProps<'Browse'>> = ({ navigation }) => {
               })}
             </List.Accordion>
           </Surface>
-          <Margin marginVertical={5}>
-            <BannerAd
-              unitId={Ads.BANNER_ID}
-              size={BannerAdSize.ADAPTIVE_BANNER}
-              onAdLoaded={() => {}}
-              onAdOpened={() => {}}
-              onAdClosed={() => {}}
-              onAdFailedToLoad={() => {}}
-              onAdLeftApplication={() => {}}
-            />
-          </Margin>
         </View>
       </Animated.ScrollView>
     </View>

@@ -1,4 +1,3 @@
-import { BannerAd, BannerAdSize } from '@react-native-firebase/admob';
 import React, { FC, useMemo, useState } from 'react';
 import {
   View,
@@ -23,7 +22,6 @@ import {
 } from 'react-native-paper';
 import Animated from 'react-native-reanimated';
 import { IAnime, IEntity, IEntityBasic } from 'gogoanime-api';
-import Ads from '../Ads';
 import { Center } from '../components';
 import { theme } from '../constants';
 import { useGoGoAnime } from '../gogoAnime';
@@ -234,15 +232,6 @@ export const Series: FC<SeriesProps> = ({
                 )}
               </View>
             </Surface>
-            <BannerAd
-              unitId={Ads.BANNER_ID}
-              size={BannerAdSize.ADAPTIVE_BANNER}
-              onAdLoaded={() => {}}
-              onAdOpened={() => {}}
-              onAdClosed={() => {}}
-              onAdFailedToLoad={() => {}}
-              onAdLeftApplication={() => {}}
-            />
           </>
         </View>
       </Animated.ScrollView>

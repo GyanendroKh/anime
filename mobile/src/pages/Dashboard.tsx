@@ -4,14 +4,12 @@ import { useQuery } from 'react-query';
 import { Appbar, Title } from 'react-native-paper';
 import Animated from 'react-native-reanimated';
 import { IEntity } from 'gogoanime-api';
-import { BannerAd, BannerAdSize } from '@react-native-firebase/admob';
 import { useGoGoAnime } from '../gogoAnime';
 import { useCollapsibleAppbar } from '../hooks';
 import styles from '../styles';
 import { HomeNavProps } from '../navigators';
 import { APPBAR_HEIGHT } from '../constants';
-import { Margin, SeriesItem } from '../components';
-import Ads from '../Ads';
+import { SeriesItem } from '../components';
 
 const AnimeSection: FC<{
   title: string;
@@ -85,17 +83,6 @@ export const Dashboard: FC<HomeNavProps<'Dashboard'>> = ({ navigation }) => {
             }}
           />
         )}
-        <Margin marginVertical={5}>
-          <BannerAd
-            unitId={Ads.BANNER_ID}
-            size={BannerAdSize.ADAPTIVE_BANNER}
-            onAdLoaded={() => {}}
-            onAdOpened={() => {}}
-            onAdClosed={() => {}}
-            onAdFailedToLoad={() => {}}
-            onAdLeftApplication={() => {}}
-          />
-        </Margin>
         {popularOnGoing && (
           <AnimeSection
             title="Popular OnGoing"
@@ -105,17 +92,6 @@ export const Dashboard: FC<HomeNavProps<'Dashboard'>> = ({ navigation }) => {
             }}
           />
         )}
-        <Margin marginVertical={5}>
-          <BannerAd
-            unitId={Ads.BANNER_ID}
-            size={BannerAdSize.ADAPTIVE_BANNER}
-            onAdLoaded={() => {}}
-            onAdOpened={() => {}}
-            onAdClosed={() => {}}
-            onAdFailedToLoad={() => {}}
-            onAdLeftApplication={() => {}}
-          />
-        </Margin>
       </Animated.ScrollView>
     </View>
   );
