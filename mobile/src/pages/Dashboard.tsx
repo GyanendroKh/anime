@@ -63,7 +63,13 @@ export const Dashboard: FC<HomeNavProps<'Dashboard'>> = ({ navigation }) => {
     <View style={styles.flex1}>
       <Animated.View style={[styles2.appBar, appBarStyle]}>
         <Appbar.Header>
-          <Appbar.Content title="Anime" />
+          <Appbar.Content title="Arch Anime" />
+          <Appbar.Action
+            icon="magnify"
+            onPress={() => {
+              navigation.navigate('Search');
+            }}
+          />
         </Appbar.Header>
       </Animated.View>
       <Animated.ScrollView style={contentStyle} onScroll={scrollHandler}>

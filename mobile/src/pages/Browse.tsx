@@ -32,7 +32,7 @@ export const Browse: FC<ExploreNavProps<'Browse'>> = ({ navigation }) => {
     <View style={styles.flex1}>
       <Animated.View style={[styles2.appBar, appBarStyle]}>
         <Appbar.Header>
-          <Appbar.Content title="Anime" />
+          <Appbar.Content title="Arch Anime" />
           <Appbar.Action
             icon="magnify"
             onPress={() => {
