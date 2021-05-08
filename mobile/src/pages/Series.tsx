@@ -55,8 +55,8 @@ export const Series: FC<SeriesProps> = ({
     'info' | 'episodes'
   >('info');
 
-  const { data: anime, isLoading: loading, error } = useQuery(
-    'animeInfo',
+  const { data: anime, isLoading, error } = useQuery(
+    ['animeInfo', series.id],
     async () => {
       return await gogoAnime.animeInfo(series.id);
     }
@@ -87,17 +87,6 @@ export const Series: FC<SeriesProps> = ({
 
   return (
     <>
-      {loading && (
-        <Center flex={true}>
-          <ActivityIndicator size={25} />
-        </Center>
-      )}
-      {error && (
-        <Center flex={true}>
-          <Title>Error!</Title>
-          <Paragraph>{String(error)}</Paragraph>
-        </Center>
-      )}
       <View style={styles2.imageWrapper}>
         <Image
           source={{ uri: series.thumbnail }}
@@ -129,7 +118,9 @@ export const Series: FC<SeriesProps> = ({
             style={styles2.contentHeader}
           >
             <Title>{series.title}</Title>
-            <Subheading>Released: {anime?.released}</Subheading>
+            {anime && anime.released && (
+              <Subheading>Released: {anime?.released}</Subheading>
+            )}
           </LinearGradient>
           <>
             <Surface style={[styles2.contentDetails, styles.flexGrow1]}>
@@ -168,6 +159,17 @@ export const Series: FC<SeriesProps> = ({
                     : styles.displayNone
                 }
               >
+                {isLoading && (
+                  <Center flex={true}>
+                    <ActivityIndicator size={25} color={theme.colors.primary} />
+                  </Center>
+                )}
+                {error && !isLoading && (
+                  <Center flex={true}>
+                    <Title>Error!</Title>
+                    <Paragraph>{String(error)}</Paragraph>
+                  </Center>
+                )}
                 <Paragraph>{anime?.summary}</Paragraph>
               </View>
               <View
