@@ -1,3 +1,4 @@
+import { BannerAd, BannerAdSize } from '@react-native-firebase/admob';
 import React, { FC, useState } from 'react';
 import { Dimensions, StyleSheet, View, FlatList } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -9,7 +10,8 @@ import {
   Title
 } from 'react-native-paper';
 import { useQuery } from 'react-query';
-import { Center, SeriesItem } from '../components';
+import Ads from '../Ads';
+import { Center, Margin, SeriesItem } from '../components';
 import { useGoGoAnime } from '../gogoAnime';
 import { ExploreNavProps, HomeNavProps } from '../navigators';
 import styles2 from '../styles';
@@ -91,6 +93,17 @@ const Search: FC<SearchProps> = ({ goBack, onPress }) => {
         }
         ListFooterComponent={
           <>
+            <Margin marginVertical={5}>
+              <BannerAd
+                unitId={Ads.BANNER_ID}
+                size={BannerAdSize.ADAPTIVE_BANNER}
+                onAdLoaded={() => {}}
+                onAdOpened={() => {}}
+                onAdClosed={() => {}}
+                onAdFailedToLoad={() => {}}
+                onAdLeftApplication={() => {}}
+              />
+            </Margin>
             {series?.data.length !== 0 && (
               <>
                 <View style={styles2.paginationWrapper}>
