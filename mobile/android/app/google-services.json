@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "218672836136-d71fc68lmkapicr6s9988qnqkkbbbj83.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.arch.anime",
+            "certificate_hash": "c4e8824383821a28008494e1f1a9aacd1a14c832"
+          }
+        },
+        {
           "client_id": "218672836136-ir9ufa1dl3517udu5j49ue8hql50hrvj.apps.googleusercontent.com",
           "client_type": 3
         }
