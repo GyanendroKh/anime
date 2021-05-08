@@ -15,7 +15,6 @@ import {
 } from 'react-native-paper';
 import { useQuery } from 'react-query';
 import { Center, SeriesItem } from '../components';
-import { theme } from '../constants';
 import { useGoGoAnime } from '../gogoAnime';
 import { ExploreNavProps } from '../navigators';
 import styles from '../styles';
@@ -79,7 +78,7 @@ export const Genre: FC<ExploreNavProps<'Genres'>> = ({
             );
           }}
           ListFooterComponent={
-            <View style={styles2.paginationWrapper}>
+            <View style={styles.paginationWrapper}>
               {data?.paginations.map(p => {
                 return (
                   <>
@@ -89,8 +88,8 @@ export const Genre: FC<ExploreNavProps<'Genres'>> = ({
                         setPage(p);
                       }}
                       style={[
-                        styles2.paginationItem,
-                        p === page ? styles2.paginationItemActive : {}
+                        styles.paginationItem,
+                        p === page ? styles.paginationItemActive : {}
                       ]}
                     >
                       <Text>{p}</Text>
@@ -116,21 +115,5 @@ const styles2 = StyleSheet.create({
   },
   loadingIndicator: {
     padding: 15
-  },
-  paginationWrapper: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    borderTopColor: theme.colors.backdrop,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    marginTop: 10,
-    paddingBottom: 5
-  },
-  paginationItem: {
-    paddingHorizontal: 35,
-    paddingVertical: 10
-  },
-  paginationItemActive: {
-    borderTopColor: theme.colors.primary,
-    borderTopWidth: 2
   }
 });

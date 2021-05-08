@@ -10,7 +10,6 @@ import {
 } from 'react-native-paper';
 import { useQuery } from 'react-query';
 import { Center, SeriesItem } from '../components';
-import { theme } from '../constants';
 import { useGoGoAnime } from '../gogoAnime';
 import { ExploreNavProps, HomeNavProps } from '../navigators';
 import styles2 from '../styles';
@@ -94,7 +93,7 @@ const Search: FC<SearchProps> = ({ goBack, onPress }) => {
           <>
             {series?.data.length !== 0 && (
               <>
-                <View style={styles.paginationWrapper}>
+                <View style={styles2.paginationWrapper}>
                   {series?.paginations.map(p => {
                     return (
                       <>
@@ -104,8 +103,8 @@ const Search: FC<SearchProps> = ({ goBack, onPress }) => {
                             setPage(p);
                           }}
                           style={[
-                            styles.paginationItem,
-                            p === page ? styles.paginationItemActive : {}
+                            styles2.paginationItem,
+                            p === page ? styles2.paginationItemActive : {}
                           ]}
                         >
                           <Text>{p}</Text>
@@ -164,21 +163,5 @@ const styles = StyleSheet.create({
   },
   loadingIndicator: {
     padding: 15
-  },
-  paginationWrapper: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    borderTopColor: theme.colors.backdrop,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    marginTop: 10,
-    paddingBottom: 5
-  },
-  paginationItem: {
-    paddingHorizontal: 35,
-    paddingVertical: 10
-  },
-  paginationItemActive: {
-    borderTopColor: theme.colors.primary,
-    borderTopWidth: 2
   }
 });

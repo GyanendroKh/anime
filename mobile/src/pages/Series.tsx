@@ -209,7 +209,7 @@ export const Series: FC<SeriesProps> = ({
                   })}
                 {anime?.episodePages.length !== 1 && (
                   <ScrollView
-                    contentContainerStyle={styles2.paginationWrapper}
+                    contentContainerStyle={styles.paginationWrapper}
                     horizontal={true}
                   >
                     {anime?.episodePages.map((p, idx) => {
@@ -220,8 +220,8 @@ export const Series: FC<SeriesProps> = ({
                             setPage(idx);
                           }}
                           style={[
-                            styles2.paginationItem,
-                            idx === page ? styles2.paginationItemActive : {}
+                            styles.paginationItem,
+                            idx === page ? styles.paginationItemActive : {}
                           ]}
                         >
                           <Text>
@@ -330,21 +330,5 @@ const styles2 = StyleSheet.create({
   contentDetailsHeaderItemActive: {
     borderBottomColor: theme.colors.primary,
     borderBottomWidth: 2
-  },
-  paginationWrapper: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    borderTopColor: theme.colors.backdrop,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    marginTop: 10,
-    paddingBottom: 5
-  },
-  paginationItem: {
-    paddingHorizontal: 35,
-    paddingVertical: 10
-  },
-  paginationItemActive: {
-    borderTopColor: theme.colors.primary,
-    borderTopWidth: 2
   }
 });

@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { theme } from './constants';
 
 const styles = StyleSheet.create({
   flex1: {
@@ -39,6 +40,22 @@ const styles = StyleSheet.create({
   },
   alignSelfCenter: {
     alignSelf: 'center'
+  },
+  paginationWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    borderTopColor: theme.colors.backdrop,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    marginTop: 10,
+    paddingBottom: 5
+  },
+  paginationItem: {
+    paddingHorizontal: 35,
+    paddingVertical: 10
+  },
+  paginationItemActive: {
+    borderTopColor: theme.colors.primary,
+    borderTopWidth: 2
   }
 });
 
