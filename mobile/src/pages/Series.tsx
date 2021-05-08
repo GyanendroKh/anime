@@ -5,8 +5,10 @@ import {
   Image,
   Dimensions,
   StyleSheet,
-  ActivityIndicator
+  ActivityIndicator,
+  TouchableOpacity
 } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import { useQuery } from 'react-query';
 import LinearGradient from 'react-native-linear-gradient';
 import {
@@ -15,6 +17,7 @@ import {
   Paragraph,
   Subheading,
   Surface,
+  Text,
   Title,
   TouchableRipple
 } from 'react-native-paper';
@@ -54,6 +57,7 @@ export const Series: FC<SeriesProps> = ({
   const [selectedContentHeader, setSelectedContentHeader] = useState<
     'info' | 'episodes'
   >('info');
+  const [page, setPage] = useState(0);
 
   const { data: anime, isLoading, error } = useQuery(
     ['animeInfo', series.id],
@@ -62,14 +66,13 @@ export const Series: FC<SeriesProps> = ({
     }
   );
 
-  const { data: animeEpisodes } = useQuery(
-    ['animeEpisode', anime?.movieId],
+  const { data: animeEpisodes, isLoading: episodeLoading } = useQuery(
+    ['animeEpisode', anime?.movieId, page],
     async () => {
-      return await gogoAnime.animeEpisodes(
-        anime?.movieId ?? '',
-        0,
-        anime?.episodeCount ?? 0
-      );
+      const start = anime?.episodePages[page].start ?? 0;
+      const end = anime?.episodePages[page].end ?? 0;
+
+      return await gogoAnime.animeEpisodes(anime?.movieId ?? '', start, end);
     },
     {
       enabled: !!anime
@@ -179,7 +182,13 @@ export const Series: FC<SeriesProps> = ({
                     : styles.displayNone
                 }
               >
-                {anime &&
+                {episodeLoading && (
+                  <Center flex={true}>
+                    <ActivityIndicator size={25} color={theme.colors.primary} />
+                  </Center>
+                )}
+                {!episodeLoading &&
+                  anime &&
                   episodes &&
                   episodes?.map((episode, idx) => {
                     return (
@@ -198,6 +207,31 @@ export const Series: FC<SeriesProps> = ({
                       />
                     );
                   })}
+                {anime?.episodePages.length !== 1 && (
+                  <ScrollView
+                    contentContainerStyle={styles2.paginationWrapper}
+                    horizontal={true}
+                  >
+                    {anime?.episodePages.map((p, idx) => {
+                      return (
+                        <TouchableOpacity
+                          key={`${p.start}-${p.end}`}
+                          onPress={() => {
+                            setPage(idx);
+                          }}
+                          style={[
+                            styles2.paginationItem,
+                            idx === page ? styles2.paginationItemActive : {}
+                          ]}
+                        >
+                          <Text>
+                            {p.start} - {p.end}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </ScrollView>
+                )}
               </View>
             </Surface>
             <BannerAd
@@ -296,5 +330,21 @@ const styles2 = StyleSheet.create({
   contentDetailsHeaderItemActive: {
     borderBottomColor: theme.colors.primary,
     borderBottomWidth: 2
+  },
+  paginationWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    borderTopColor: theme.colors.backdrop,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    marginTop: 10,
+    paddingBottom: 5
+  },
+  paginationItem: {
+    paddingHorizontal: 35,
+    paddingVertical: 10
+  },
+  paginationItemActive: {
+    borderTopColor: theme.colors.primary,
+    borderTopWidth: 2
   }
 });
