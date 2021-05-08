@@ -105,6 +105,17 @@ export const Dashboard: FC<HomeNavProps<'Dashboard'>> = ({ navigation }) => {
             }}
           />
         )}
+        <Margin marginVertical={5}>
+          <BannerAd
+            unitId={Ads.BANNER_ID}
+            size={BannerAdSize.ADAPTIVE_BANNER}
+            onAdLoaded={() => {}}
+            onAdOpened={() => {}}
+            onAdClosed={() => {}}
+            onAdFailedToLoad={() => {}}
+            onAdLeftApplication={() => {}}
+          />
+        </Margin>
       </Animated.ScrollView>
     </View>
   );
