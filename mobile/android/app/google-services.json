@@ -1,28 +1,20 @@
 {
   "project_info": {
-    "project_number": "218672836136",
-    "project_id": "arch-anime",
-    "storage_bucket": "arch-anime.appspot.com"
+    "project_number": "268140020899",
+    "project_id": "arch-anime-lol",
+    "storage_bucket": "arch-anime-lol.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:218672836136:android:9c15251ed49ab464dfcf1d",
+        "mobilesdk_app_id": "1:268140020899:android:df9ae495e94e6288ca2b16",
         "android_client_info": {
           "package_name": "com.arch.anime"
         }
       },
       "oauth_client": [
         {
-          "client_id": "218672836136-bcqcss9ng5jtsr7nj35j5o1mhmcr08t4.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.arch.anime",
-            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
-          }
-        },
-        {
-          "client_id": "218672836136-d71fc68lmkapicr6s9988qnqkkbbbj83.apps.googleusercontent.com",
+          "client_id": "268140020899-1i00c0ne3ahorn1aur63mf52drvlmeh2.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.arch.anime",
@@ -30,26 +22,33 @@
           }
         },
         {
-          "client_id": "218672836136-ir9ufa1dl3517udu5j49ue8hql50hrvj.apps.googleusercontent.com",
+          "client_id": "268140020899-4cj9nnpgudm4sq5csij7ce2vr716q3sh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.arch.anime",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "268140020899-t4soujinv6bqd7g3tdhckrcq5colqj86.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBM2TdSg5QUUIjKF4z3Il28Q19Npc2R4wQ"
+          "current_key": "AIzaSyDNzq0QYp1WdBB02mWVOeE8khWkFNrSCus"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "218672836136-ir9ufa1dl3517udu5j49ue8hql50hrvj.apps.googleusercontent.com",
+              "client_id": "268140020899-t4soujinv6bqd7g3tdhckrcq5colqj86.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
         }
-      },
-      "admob_app_id": "ca-app-pub-7227836186229955~5381668434"
+      }
     }
   ],
   "configuration_version": "1"
